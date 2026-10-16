@@ -1,7 +1,12 @@
 'use client';
 import { useParams } from 'next/navigation';
 import { useState } from 'react';
-import { supabase } from '../../../lib/supabase';
+import { createClient } from '@supabase/supabase-js';
+
+const supabase = createClient(
+  process.env.NEXT_PUBLIC_SUPABASE_URL,
+  process.env.NEXT_PUBLIC_SUPABASE_ANON_KEY
+);
 
 const MENU = [
   { id: 1, name: 'Zinger Burger', price: 8, cat: 'Burgers', image: 'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=400' },
@@ -14,7 +19,7 @@ const MENU = [
 
 export default function MenuPage() {
   const params = useParams();
-  const tableId = params.tableId || 'T1';
+  const tableId = params?.tableId || 'T1';
   const [cart, setCart] = useState([]);
   const [name, setName] = useState('');
   const [placed, setPlaced] = useState(false);
@@ -55,10 +60,10 @@ export default function MenuPage() {
   return (
     <div style={{ minHeight: '100vh', background: '#070707', color: '#F3E5AB', padding: '16px 16px 120px', fontFamily: 'sans-serif' }}>
       <div style={{ maxWidth: '500px', margin: '0 auto' }}>
-        <div style={{ border: '1px solid #D4AF37', borderRadius: '16px', padding: '14px', marginBottom: '16px', background: 'linear-gradient(to right, #111, #1a1a1a)' }}>
+        <div style={{ border: '1px solid #D4AF37', borderRadius: '16px', padding: '14px', marginBottom: '16px', background: '#111' }}>
           <h2 style={{ margin: 0, fontSize: '20px' }}>Table {tableId} 🍽️</h2>
-          <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#888' }}>Scan QR - Order Real Food - Kitchen LIVE</p>
-          <input placeholder="Your Name likho..." value={name} onChange={e=>setName(e.target.value)} style={{ width: '100%', marginTop: '12px', padding: '10px 14px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', outline: 'none' }} />
+          <p style={{ margin: '4px 0 0', fontSize: '11px', color: '#888' }}>Real Photos - Cancel / Add</p>
+          <input placeholder="Your Name" value={name} onChange={e=>setName(e.target.value)} style={{ width: '100%', marginTop: '12px', padding: '10px 14px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff' }} />
         </div>
 
         {MENU.map(item => {
@@ -66,33 +71,27 @@ export default function MenuPage() {
           return (
             <div key={item.id} style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', background: '#111', border: '1px solid #222', borderRadius: '14px', padding: '10px', marginBottom: '10px' }}>
               <div style={{ display: 'flex', gap: '12px', alignItems: 'center' }}>
-                <img src={item.image} alt={item.name} style={{ width: '58px', height: '58px', borderRadius: '12px', objectFit: 'cover', border: '1px solid #333' }} />
-                <div>
-                  <div style={{ fontSize: '14px', fontWeight: 'bold' }}>{item.name}</div>
-                  <div style={{ fontSize: '11px', color: '#888' }}>{item.cat} • <span style={{ color: '#D4AF37', fontWeight: 'bold' }}>${item.price}</span></div>
-                </div>
+                <img src={item.image} alt={item.name} style={{ width: '58px', height: '58px', borderRadius: '12px', objectFit: 'cover' }} />
+                <div><div style={{ fontSize: '14px', fontWeight: 'bold' }}>{item.name}</div><div style={{ fontSize: '11px', color: '#888' }}>{item.cat} • <span style={{ color: '#D4AF37', fontWeight: 'bold' }}>${item.price}</span></div></div>
               </div>
               {inCart ? (
                 <div style={{ display: 'flex', gap: '6px', alignItems: 'center' }}>
-                  <button onClick={()=>decQty(item.id)} style={{ width: '30px', height: '30px', background: '#333', color: '#fff', border: 'none', borderRadius: '50%', fontWeight: 'bold' }}>-</button>
-                  <span style={{ fontSize: '13px', fontWeight: 'bold', minWidth: '20px', textAlign: 'center' }}>{inCart.qty}</span>
+                  <button onClick={()=>decQty(item.id)} style={{ width: '30px', height: '30px', background: '#333', color: '#fff', border: 'none', borderRadius: '50%' }}>-</button>
+                  <span style={{ fontWeight: 'bold', minWidth: '20px', textAlign: 'center' }}>{inCart.qty}</span>
                   <button onClick={()=>addToCart(item)} style={{ width: '30px', height: '30px', background: '#D4AF37', color: '#000', border: 'none', borderRadius: '50%', fontWeight: 'bold' }}>+</button>
                   <button onClick={()=>removeItem(item.id)} style={{ marginLeft: '2px', fontSize: '10px', background: '#ff4444', color: '#fff', border: 'none', borderRadius: '4px', padding: '5px 7px' }}>X</button>
                 </div>
               ) : (
-                <button onClick={()=>addToCart(item)} style={{ padding: '8px 16px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', border: 'none', borderRadius: '20px', fontWeight: 'bold', color: '#000' }}>+ Add</button>
+                <button onClick={()=>addToCart(item)} style={{ padding: '8px 16px', background: '#D4AF37', border: 'none', borderRadius: '20px', fontWeight: 'bold' }}>+ Add</button>
               )}
             </div>
           );
         })}
 
         {cart.length>0 && (
-          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111', borderTop: '2px solid #D4AF37', padding: '14px', maxWidth: '500px', margin: '0 auto', borderRadius: '16px 16px 0 0' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}>
-              <span>{cart.reduce((a,b)=>a+b.qty,0)} items • <b style={{ color: '#D4AF37' }}>${total}</b></span>
-              <button onClick={()=>setCart([])} style={{ fontSize: '11px', background: 'transparent', border: '1px solid #ff4444', color: '#ff4444', borderRadius: '6px', padding: '3px 10px' }}>Clear All</button>
-            </div>
-            <button onClick={placeOrder} style={{ width: '100%', padding: '14px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', border: 'none', borderRadius: '10px', fontWeight: 'bold', fontSize: '15px' }}>Place Order - ${total} 🍽️</button>
+          <div style={{ position: 'fixed', bottom: 0, left: 0, right: 0, background: '#111', borderTop: '2px solid #D4AF37', padding: '14px', maxWidth: '500px', margin: '0 auto' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', marginBottom: '10px', fontSize: '13px' }}><span>{cart.reduce((a,b)=>a+b.qty,0)} items • ${total}</span><button onClick={()=>setCart([])} style={{ fontSize: '11px', background: 'transparent', border: '1px solid #ff4444', color: '#ff4444', borderRadius: '6px', padding: '3px 10px' }}>Clear All</button></div>
+            <button onClick={placeOrder} style={{ width: '100%', padding: '14px', background: '#D4AF37', border: 'none', borderRadius: '10px', fontWeight: 'bold' }}>Place Order - ${total} 🍽️</button>
           </div>
         )}
       </div>
