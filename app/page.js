@@ -15,7 +15,7 @@ export default function Home() {
 
   async function fetchData() {
     setLoading(true);
-    const { data } = await supabase.from("tables").select("*");
+    const { data } = await supabase.from("tables").select("*").order("id");
     if (data) {
       const mapped = data.map(t => ({...t, top: t.top_pos, left: t.left_pos }));
       setTables(mapped);
@@ -39,35 +39,46 @@ export default function Home() {
     fetchData();
   }
 
-  if (loading) return <div className="min-h-screen bg-[#0f1115] text-white flex items-center justify-center">Loading TableNest LIVE...</div>;
+  if (loading) return <div style={{minHeight:'100vh', background:'#0f1115', color:'white', display:'flex', alignItems:'center', justifyContent:'center'}}>Loading GOLD...</div>;
 
   return (
-    <div className="min-h-screen bg-[#0f1115] text-white p-6">
-      <div className="flex justify-between items-center mb-6">
+    <div style={{minHeight:'100vh', background:'#0f1115', color:'white', padding:'20px', fontFamily:'sans-serif'}}>
+      <div style={{display:'flex', justifyContent:'space-between', alignItems:'center', marginBottom:'20px', flexWrap:'wrap', gap:'10px'}}>
         <div>
-          <h1 className="text-3xl font-bold">TableNest 🟢 LIVE</h1>
-          <p className="text-gray-400 text-sm">Supabase Connected</p>
+          <h1 style={{fontSize:'32px', fontWeight:'bold', margin:0}}>TableNest <span style={{color:'#fbbf24'}}>GOLD</span> <span style={{fontSize:'18px', background:'#22c55e', padding:'4px 10px', borderRadius:'20px'}}>● LIVE</span></h1>
+          <p style={{color:'#9ca3af', fontSize:'13px', margin:'4px 0 0 0'}}>Supabase Connected • Isometric Luxury View</p>
         </div>
-        <div className="bg-[#1a1d24] px-6 py-3 rounded-xl border border-gray-800">
-          <p className="text-xs text-gray-400">TODAY REVENUE</p>
-          <p className="text-2xl font-bold text-green-400">${revenue}</p>
+        <div style={{background:'#1a1d24', padding:'12px 24px', borderRadius:'16px', border:'1px solid #2a2e39'}}>
+          <p style={{fontSize:'11px', color:'#9ca3af', margin:0}}>TODAY REVENUE</p>
+          <p style={{fontSize:'28px', fontWeight:'bold', color:'#4ade80', margin:0}}>${revenue}</p>
         </div>
       </div>
 
-      <div className="relative w-full h-[650px] bg-[#151821] rounded-2xl border border-gray-800 overflow-hidden">
+      <div style={{position:'relative', width:'100%', height:'700px', background:'radial-gradient(circle at 50% 0%, #1e212e 0%, #151821 100%)', borderRadius:'24px', border:'1px solid #2a2e39', overflow:'hidden', padding:'20px'}}>
+        {/* Floor Pattern */}
+        <div style={{position:'absolute', inset:0, opacity:0.05, backgroundImage:'linear-gradient(#fbbf24 1px, transparent 1px), linear-gradient(90deg, #fbbf24 1px, transparent 1px)', backgroundSize:'40px 40px'}}></div>
+        
         {tables.map(t => (
-          <div key={t.id}
-            onClick={() => handleTableClick(t)}
-            className={`absolute w-20 h-20 rounded-full flex flex-col items-center justify-center cursor-pointer font-bold border-2 hover:scale-110
-            ${t.status === 'Available'? 'bg-[#2a2e39] border-gray-600' : t.status === 'Occupied'? 'bg-orange-500 border-orange-200' : 'bg-purple-600 border-purple-200'}`}
-            style={{ top: t.top, left: t.left }}>
-            <span>{t.id}</span>
-            <span className="text-[10px]">{t.status}</span>
+          <div key={t.id} onClick={() => handleTableClick(t)}
+            style={{position:'absolute', top:t.top, left:t.left, width:'110px', height:'110px', borderRadius:'50%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', cursor:'pointer', fontWeight:'bold', border:'2px solid', transition:'all 0.2s', 
+            background: t.status==='Available' ? '#2a2e39' : t.status==='Occupied' ? 'linear-gradient(135deg, #f97316, #ea580c)' : 'linear-gradient(135deg, #9333ea, #7e22ce)',
+            borderColor: t.status==='Available' ? '#4b5563' : '#fed7aa',
+            boxShadow: t.status==='Available' ? 'none' : '0 0 20px rgba(251,191,36,0.4)',
+            transform:'perspective(500px) rotateX(20deg)'}}>
+            <span style={{fontSize:'20px'}}>{t.id}</span>
+            <span style={{fontSize:'10px', marginTop:'2px'}}>{t.status}</span>
+            <span style={{fontSize:'9px', opacity:0.8}}>{t.guests>0 ? `${t.guests} Guests` : ''}</span>
           </div>
         ))}
+
+        <div style={{position:'absolute', bottom:'20px', left:'20px', display:'flex', gap:'12px'}}>
+          <div style={{display:'flex', alignItems:'center', gap:'6px', fontSize:'12px'}}><div style={{width:'12px', height:'12px', background:'#2a2e39', borderRadius:'50%'}}></div> Available</div>
+          <div style={{display:'flex', alignItems:'center', gap:'6px', fontSize:'12px'}}><div style={{width:'12px', height:'12px', background:'#f97316', borderRadius:'50%'}}></div> Occupied</div>
+          <div style={{display:'flex', alignItems:'center', gap:'6px', fontSize:'12px'}}><div style={{width:'12px', height:'12px', background:'#9333ea', borderRadius:'50%'}}></div> Reserved</div>
+        </div>
       </div>
 
-      <p className="mt-4 text-center text-gray-500 text-xs">Click table to change status • Saved in Supabase LIVE</p>
+      <p style={{marginTop:'16px', textAlign:'center', color:'#6b7280', fontSize:'12px'}}>✨ Click any table to change status • Data saved in Supabase LIVE • Premium Isometric Design</p>
     </div>
   );
 }
