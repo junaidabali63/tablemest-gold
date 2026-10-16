@@ -9,12 +9,12 @@ const supabase = supabaseUrl && supabaseKey ? createClient(supabaseUrl, supabase
 
 // PREMIUM LUXURY IMAGES - 100% MATCHING
 const MENU = [
-  { id: 1, name: 'Zinger Burger', price: 8, cat: 'Juicy & Crispy', image: 'https://images.unsplash.com/photo-1568909344668-6f14a07b56a0?w=600' },
-  { id: 2, name: 'Chicken Pizza', price: 12, cat: 'Cheesy Delight', image: 'https://images.unsplash.com/photo-1565299624946-b28f40a0ae38?w=600' },
+  { id: 1, name: 'Zinger Burger', price: 8, cat: 'Juicy & Crispy', image: 'https://images.unsplash.com/photo-1553979459-d2229ba7433b?w=600' },
+  { id: 2, name: 'Chicken Pizza', price: 12, cat: 'Cheesy Delight', image: 'https://images.unsplash.com/photo-1513104890138-7c749659a591?w=600' },
   { id: 3, name: 'Chicken Biryani', price: 10, cat: 'Desi Special', image: 'https://images.unsplash.com/photo-1631515243349-e0cb75fb8d3a?w=600' },
-  { id: 4, name: 'Loaded Fries', price: 4, cat: 'Golden Crunch', image: 'https://images.unsplash.com/photo-1630384060421-cb20d0e0649d?w=600' },
-  { id: 5, name: 'Cold Drink', price: 3, cat: 'Chilled', image: 'https://images.unsplash.com/photo-1622483767028-3f66f32aef97?w=600' },
-  { id: 6, name: 'Club Sandwich', price: 9, cat: 'Premium Club', image: 'https://images.unsplash.com/photo-1550507992-eb63ffee0847?w=600' },
+  { id: 4, name: 'Loaded Fries', price: 4, cat: 'Golden Crunch', image: 'https://images.unsplash.com/photo-1585109649139-366815a0d713?w=600' },
+  { id: 5, name: 'Cold Drink', price: 3, cat: 'Chilled', image: 'https://images.unsplash.com/photo-1624552184280-9e9631bbeee9?w=600' },
+  { id: 6, name: 'Club Sandwich', price: 9, cat: 'Premium Club', image: 'https://images.unsplash.com/photo-1521390188846-e2a3a97453a0?w=600' },
 ];
 
 export default function MenuPage() {
