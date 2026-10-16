@@ -19,16 +19,24 @@ export default function Page() {
 
   const selectedTable = tables.find(t => t.id === selectedTableId) || tables[0];
 
-  const handleStatusChange = (newStatus) => {
+    const handleStatusChange = async (newStatus) => {
+    setTables(tables.map(t => t.id === selectedTableId ? { ...t, status: newStatus } : t));
+    try{
+      await supabase.from("tables").update({ status: newStatus }).eq("id", selectedTableId);
+    }catch(e){}
+  };
     setTables(tables.map(t => t.id === selectedTableId ? { ...t, status: newStatus } : t));
   };
 
-  const handleBookingSubmit = (e) => {
-    e.preventDefault();
-    setTables(tables.map(t => t.id === bookingData.tableId ? { ...t, status: 'Reserved', guests: bookingData.guests, time: bookingData.time, name: bookingData.name } : t));
-    setIsModalOpen(false);
-    setBookingData({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
-  };
+      const handleBookingSubmit = async (e) => {
+      e.preventDefault();
+      setTables(tables.map(t => t.id === bookingData.tableId ? { ...t, status: 'Reserved', guests: parseInt(bookingData.guests), time: bookingData.time, name: bookingData.name } : t));
+      try{
+        await supabase.from("tables").update({ status: 'Reserved', guests: parseInt(bookingData.guests), time: bookingData.time, name: bookingData.name }).eq("id", bookingData.tableId);
+      }catch(e){}
+      setIsModalOpen(false);
+      setBookingData({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
+    };
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#070707', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
