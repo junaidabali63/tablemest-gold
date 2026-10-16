@@ -13,7 +13,13 @@ export default function Page() {
     { id: 'T6', top: '48%', left: '77%', status: 'Reserved', time: '8:00 PM', name: 'David L.' },
     { id: 'T7', top: '56%', left: '86%', status: 'Reserved', time: '8:30 PM', name: 'Emma W.' },
   ]);
-
+  // AUTH GUARD - GOLD SECURITY
+  useEffect(() => {
+    const auth = localStorage.getItem('gold_auth');
+    if (!auth) {
+      window.location.href = '/login';
+    }
+  }, []);
   const [selectedTableId, setSelectedTableId] = useState('T3');
   const [isModalOpen, setIsModalOpen] = useState(false);
   const [bookingData, setBookingData] = useState({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
@@ -52,11 +58,13 @@ export default function Page() {
             <p style={{ margin: 0, fontSize: '10px', color: '#888', letterSpacing: '1px' }}>PREMIUM HOSPITALITY SaaS • LIVE 3D</p>
           </div>
         </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#aaa', background: '#141414', padding: '6px 14px', borderRadius: '20px', border: '1px solid #2a2a2a' }}>
-          <span style={{ width: '8px', height: '8px', backgroundColor: '#2ecc71', borderRadius: '50%', display: 'inline-block' }}></span>
-          <span>LIVE</span>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
+          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#aaa', background: '#141414', padding: '6px 14px', borderRadius: '20px', border: '1px solid #2a2a2a' }}>
+            <span style={{ width: '8px', height: '8px', backgroundColor: '#2ecc71', borderRadius: '50%', display: 'inline-block' }}></span>
+            <span>LIVE</span>
+          </div>
+          <button onClick={() => { localStorage.removeItem('gold_auth'); window.location.href = '/login'; }} style={{ padding: '6px 12px', background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', color: '#ff4444', borderRadius: '20px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>LOGOUT</button>
         </div>
-      </div>
 
       <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '10px' }}>
         <div style={{ position: 'relative', minWidth: '700px', width: '100%', maxWidth: '1100px', margin: '0 auto', borderRadius: '14px', border: '1px solid #333', boxShadow: '0 0 25px rgba(212,175,55,0.2)', background: '#0d0d0d' }}>
