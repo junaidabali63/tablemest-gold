@@ -65,6 +65,7 @@ export default function Page() {
           </div>
           <button onClick={() => { localStorage.removeItem('gold_auth'); window.location.href = '/login'; }} style={{ padding: '6px 12px', background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', color: '#ff4444', borderRadius: '20px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>LOGOUT</button>
         </div>
+      </div>
 
       <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '10px' }}>
         <div style={{ position: 'relative', minWidth: '700px', width: '100%', maxWidth: '1100px', margin: '0 auto', borderRadius: '14px', border: '1px solid #333', boxShadow: '0 0 25px rgba(212,175,55,0.2)', background: '#0d0d0d' }}>
