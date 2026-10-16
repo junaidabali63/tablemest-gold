@@ -1,134 +1,197 @@
-"use client";
-import { useEffect, useState } from "react";
-import { createClient } from "@supabase/supabase-js";
+'use client';
+import React, { useState } from 'react';
 
-const supabaseUrl = "https://jvvqzlxeijakbqmwnrqa.supabase.co";
-const supabaseKey = "sb_publishable_6gF4V4l6t_Qa2ywG4HePAg_srLgmW4B";
-const supabase = createClient(supabaseUrl, supabaseKey);
+export default function Page() {
+  const [tables, setTables] = useState([
+    { id: 'T1', top: '48%', left: '33%', status: 'Occupied', guests: 2, time: '35m', name: 'John Doe' },
+    { id: 'T2', top: '56%', left: '42%', status: 'Available', seats: 4 },
+    { id: 'T3', top: '43%', left: '67%', status: 'Occupied', guests: 4, time: '52m', name: 'Alexander' },
+    { id: 'T4', top: '58%', left: '61%', status: 'Occupied', guests: 4, time: '20m', name: 'Sarah K.' },
+    { id: 'T5', top: '65%', left: '52%', status: 'Occupied', guests: 2, time: '15m', name: 'Michael' },
+    { id: 'T6', top: '48%', left: '77%', status: 'Reserved', time: '8:00 PM', name: 'David L.' },
+    { id: 'T7', top: '56%', left: '86%', status: 'Reserved', time: '8:30 PM', name: 'Emma W.' },
+  ]);
 
-const POSITIONS = [
-  {top:"18%", left:"12%"}, {top:"18%", left:"38%"}, {top:"18%", left:"65%"},
-  {top:"42%", left:"12%"}, {top:"42%", left:"38%"}, {top:"42%", left:"65%"},
-  {top:"68%", left:"12%"}, {top:"68%", left:"38%"}, {top:"68%", left:"65%"},
-];
+  const [selectedTableId, setSelectedTableId] = useState('T3');
+  const [isModalOpen, setIsModalOpen] = useState(false);
+  const [bookingData, setBookingData] = useState({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
 
-export default function Home() {
-  const [tables, setTables] = useState([]);
-  const [revenue, setRevenue] = useState(4824);
-  const [loading, setLoading] = useState(true);
-  const [selected, setSelected] = useState(null);
+  const selectedTable = tables.find(t => t.id === selectedTableId) || tables[0];
 
-  useEffect(()=>{ fetchData(); },[]);
+  const handleStatusChange = (newStatus) => {
+    setTables(tables.map(t => t.id === selectedTableId ? { ...t, status: newStatus } : t));
+  };
 
-  async function fetchData(){
-    setLoading(true);
-    const {data} = await supabase.from("tables").select("*").order("id");
-    if(data) setTables(data);
-    const {data:st} = await supabase.from("app_state").select("*").single();
-    if(st) setRevenue(st.revenue);
-    setLoading(false);
-  }
-
-  async function handleTableClick(t){
-    setSelected(t);
-    if(t.status==='Available'){
-      await supabase.from("tables").update({status:'Occupied', guests:2, name:'Walk-in Guest', time:'Just now'}).eq("id",t.id);
-    } else if(t.status==='Occupied'){
-      const nr = revenue + 120;
-      await supabase.from("tables").update({status:'Available', guests:0, name:'', time:''}).eq("id",t.id);
-      await supabase.from("app_state").update({revenue:nr}).eq("id",1);
-      setRevenue(nr);
-    } else if(t.status==='Reserved'){
-      await supabase.from("tables").update({status:'Occupied', time:'Just now'}).eq("id",t.id);
-    }
-    fetchData();
-  }
-
-  if(loading) return <div style={{minHeight:'100vh', background:'#0a0a0c', color:'#fbbf24', display:'flex', alignItems:'center', justifyContent:'center', fontFamily:'serif', fontSize:'24px'}}>TableNest GOLD Loading...</div>;
-
-  const occupied = tables.filter(t=>t.status==='Occupied').length;
+  const handleBookingSubmit = (e) => {
+    e.preventDefault();
+    setTables(tables.map(t => t.id === bookingData.tableId ? { ...t, status: 'Reserved', guests: bookingData.guests, time: bookingData.time, name: bookingData.name } : t));
+    setIsModalOpen(false);
+    setBookingData({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
+  };
 
   return (
-    <div style={{minHeight:'100vh', background:'#080a0f', color:'white', fontFamily:'Inter, sans-serif', padding:'0', margin:'0'}}>
-      {/* HEADER - Luxury */}
-      <div style={{background:'linear-gradient(90deg, #10121a 0%, #1a1d2a 100%)', borderBottom:'1px solid #232635', padding:'16px 20px', display:'flex', justifyContent:'space-between', alignItems:'center', position:'sticky', top:0, zIndex:10}}>
-        <div>
-          <h1 style={{margin:0, fontSize:'26px', fontWeight:'900', letterSpacing:'-0.5px'}}>TABLENEST <span style={{background:'linear-gradient(90deg, #fbbf24, #f59e0b)', WebkitBackgroundClip:'text', WebkitTextFillColor:'transparent', fontWeight:'900'}}>GOLD</span></h1>
-          <p style={{margin:'2px 0 0 0', fontSize:'11px', color:'#6b7280', letterSpacing:'1px'}}>LUXURY • ISOMETRIC • LIVE SUPABASE</p>
+    <div style={{ minHeight: '100vh', backgroundColor: '#070707', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
+      
+      {/* TOP HEADER */}
+      <div style={{ width: '100%', maxWidth: '1100px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #222', paddingBottom: '12px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
+          <div style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid #D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(212, 175, 55, 0.1)', color: '#D4AF37', fontWeight: 'bold' }}>
+            💎
+          </div>
+          <div>
+            <h1 style={{ margin: 0, fontSize: '16px', letterSpacing: '2px', color: '#F3E5AB', fontWeight: 'bold' }}>TableNest</h1>
+            <p style={{ margin: 0, fontSize: '10px', color: '#888', letterSpacing: '1px' }}>PREMIUM HOSPITALITY SaaS • LIVE 3D</p>
+          </div>
         </div>
-        <div style={{display:'flex', gap:'10px'}}>
-          <div style={{background:'#161a26', border:'1px solid #2a2e40', borderRadius:'12px', padding:'8px 14px', textAlign:'center'}}>
-            <p style={{margin:0, fontSize:'9px', color:'#8b8fa3', letterSpacing:'1px'}}>OCCUPIED</p>
-            <p style={{margin:0, fontSize:'16px', fontWeight:'bold', color:'#fbbf24'}}>{occupied}/9</p>
-          </div>
-          <div style={{background:'linear-gradient(135deg, #1a2e1a, #1f3a1f)', border:'1px solid #2a5a2a', borderRadius:'12px', padding:'8px 14px', textAlign:'center'}}>
-            <p style={{margin:0, fontSize:'9px', color:'#8fbf8f', letterSpacing:'1px'}}>REVENUE</p>
-            <p style={{margin:0, fontSize:'16px', fontWeight:'bold', color:'#4ade80'}}>${revenue}</p>
-          </div>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#aaa', background: '#141414', padding: '6px 14px', borderRadius: '20px', border: '1px solid #2a2a2a' }}>
+          <span style={{ width: '8px', height: '8px', backgroundColor: '#2ecc71', borderRadius: '50%', display: 'inline-block' }}></span>
+          <span>LIVE</span>
         </div>
       </div>
 
-      {/* FLOOR PLAN - Real Restaurant */}
-      <div style={{padding:'14px'}}>
-        <div style={{position:'relative', width:'100%', height:'680px', background:'radial-gradient(ellipse at top, #1e2235 0%, #12141f 60%)', borderRadius:'24px', border:'1px solid #232635', overflow:'hidden', boxShadow:'inset 0 0 100px rgba(0,0,0,0.5)'}}>
+      {/* 3D FLOOR PLAN CONTAINER WITH HORIZONTAL SCROLL */}
+      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '10px' }}>
+        <div style={{ position: 'relative', minWidth: '700px', width: '100%', maxWidth: '1100px', margin: '0 auto', borderRadius: '14px', border: '1px solid #333', boxShadow: '0 0 25px rgba(212,175,55,0.2)', background: '#0d0d0d' }}>
           
-          {/* Grid + Zones */}
-          <div style={{position:'absolute', inset:0, opacity:0.06, backgroundImage:'linear-gradient(#fff 1px, transparent 1px), linear-gradient(90deg, #fff 1px, transparent 1px)', backgroundSize:'48px 48px'}}></div>
-          
-          <div style={{position:'absolute', top:'10px', left:'12px', background:'#1a1d2a', border:'1px solid #2a2e40', padding:'5px 10px', borderRadius:'8px', fontSize:'10px', color:'#8b8fa3'}}>▭ ENTRANCE</div>
-          <div style={{position:'absolute', top:'10px', right:'12px', background:'#2a1f0f', border:'1px solid #4a3410', padding:'5px 10px', borderRadius:'8px', fontSize:'10px', color:'#fbbf24'}}>☕ BAR</div>
-          <div style={{position:'absolute', bottom:'10px', right:'12px', background:'#1a1f2a', border:'1px solid #2a3440', padding:'5px 10px', borderRadius:'8px', fontSize:'10px', color:'#8b8fa3'}}>🍳 KITCHEN</div>
+          <img 
+            src="/hero-ultra.webp" 
+            alt="TableNest 3D Floor Plan" 
+            style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '14px' }}
+          />
 
-          {/* Tables - Isometric Luxury */}
-          {tables.map((t,i)=>{
-            const pos = POSITIONS[i] || POSITIONS[0];
-            const isAv = t.status==='Available';
-            const isOc = t.status==='Occupied';
+          {tables.map((t) => {
+            const isSelected = selectedTableId === t.id;
+            const statusColor = t.status === 'Occupied' ? '#D4AF37' : t.status === 'Reserved' ? '#3b82f6' : '#10b981';
             return (
-              <div key={t.id} onClick={()=>handleTableClick(t)}
-                style={{position:'absolute', top:pos.top, left:pos.left, width:'92px', height:'92px', cursor:'pointer', transition:'all 0.3s ease'}}>
-                {/* Table Shadow */}
-                <div style={{position:'absolute', top:'8px', left:'4px', width:'92px', height:'92px', background:'rgba(0,0,0,0.6)', borderRadius:'50%', filter:'blur(8px)'}}></div>
-                {/* Table Body */}
-                <div style={{position:'relative', width:'92px', height:'92px', borderRadius:'50%', display:'flex', flexDirection:'column', alignItems:'center', justifyContent:'center', border:'2.5px solid', 
-                  background: isAv ? 'linear-gradient(145deg, #2a2e40, #1e2130)' : isOc ? 'linear-gradient(145deg, #ff8c2a, #e05a00)' : 'linear-gradient(145deg, #a855f7, #7e22ce)',
-                  borderColor: isAv ? '#3a3e55' : '#ffcc66',
-                  boxShadow: isAv ? 'inset 0 2px 6px rgba(255,255,255,0.1)' : '0 6px 20px rgba(255,140,0,0.4), inset 0 2px 6px rgba(255,255,255,0.3)',
-                  transform: selected?.id===t.id ? 'scale(1.1)' : 'scale(1)'}}>
-                  <span style={{fontSize:'10px', opacity:0.7, letterSpacing:'1px'}}>TABLE</span>
-                  <span style={{fontSize:'22px', fontWeight:'900', lineHeight:'1'}}>{t.id}</span>
-                  <span style={{fontSize:'8px', marginTop:'3px', background: isAv ? '#1a1d2a' : 'rgba(0,0,0,0.3)', padding:'2px 6px', borderRadius:'10px'}}>{t.status.toUpperCase()}</span>
-                </div>
-                {/* Chairs */}
-                <div style={{position:'absolute', top:'-6px', left:'36px', width:'20px', height:'8px', background:'#2a2e40', borderRadius:'4px', border:'1px solid #3a3e55'}}></div>
-                <div style={{position:'absolute', bottom:'-6px', left:'36px', width:'20px', height:'8px', background:'#2a2e40', borderRadius:'4px', border:'1px solid #3a3e55'}}></div>
-                {/* Guest Count */}
-                {t.guests>0 && <div style={{position:'absolute', top:'-8px', right:'-8px', background:'#22c55e', color:'white', fontSize:'10px', fontWeight:'bold', width:'20px', height:'20px', borderRadius:'50%', display:'flex', alignItems:'center', justifyContent:'center', border:'2px solid #080a0f'}}>{t.guests}</div>}
+              <div
+                key={t.id}
+                onClick={() => setSelectedTableId(t.id)}
+                style={{
+                  position: 'absolute',
+                  top: t.top,
+                  left: t.left,
+                  transform: 'translate(-50%, -50%)',
+                  cursor: 'pointer',
+                  padding: '6px 12px',
+                  borderRadius: '20px',
+                  background: isSelected ? statusColor : 'rgba(0, 0, 0, 0.85)',
+                  color: isSelected ? '#000' : '#F3E5AB',
+                  border: `1px solid ${statusColor}`,
+                  fontSize: '10px',
+                  fontWeight: 'bold',
+                  boxShadow: isSelected ? `0 0 15px ${statusColor}` : '0 4px 12px rgba(0,0,0,0.9)',
+                  whiteSpace: 'nowrap',
+                  zIndex: 10,
+                  transition: 'all 0.2s'
+                }}
+              >
+                {t.id} • {t.status} {t.guests ? `(${t.guests})` : ''}
               </div>
-            )
+            );
           })}
         </div>
+      </div>
 
-        {/* Legend & Info */}
-        <div style={{marginTop:'14px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-          <div style={{display:'flex', gap:'12px', fontSize:'11px', color:'#8b8fa3'}}>
-            <span style={{display:'flex', alignItems:'center', gap:'5px'}}><span style={{width:'10px', height:'10px', background:'#2a2e40', borderRadius:'50%', border:'1px solid #3a3e55', display:'inline-block'}}></span> Free</span>
-            <span style={{display:'flex', alignItems:'center', gap:'5px'}}><span style={{width:'10px', height:'10px', background:'#ff8c2a', borderRadius:'50%', display:'inline-block'}}></span> Busy</span>
-            <span style={{display:'flex', alignItems:'center', gap:'5px'}}><span style={{width:'10px', height:'10px', background:'#a855f7', borderRadius:'50%', display:'inline-block'}}></span> Reserved</span>
+      {/* DYNAMIC ACTION & STATUS MANAGER PANEL */}
+      <div style={{ width: '100%', maxWidth: '1100px', background: '#111', border: '1px solid #2a2a2a', borderRadius: '12px', padding: '16px 20px', marginTop: '14px', boxSizing: 'border-box' }}>
+        
+        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
+          <div>
+            <span style={{ fontSize: '10px', color: '#888', letterSpacing: '1px', display: 'block' }}>MANAGE SELECTED TABLE</span>
+            <span style={{ fontSize: '16px', fontWeight: 'bold', color: '#F3E5AB' }}>Table {selectedTable.id}</span>
+            <span style={{ fontSize: '12px', color: '#aaa', marginLeft: '10px' }}>Current: <b style={{ color: selectedTable.status === 'Occupied' ? '#D4AF37' : selectedTable.status === 'Reserved' ? '#3b82f6' : '#10b981' }}>{selectedTable.status}</b></span>
+            {selectedTable.name && <span style={{ fontSize: '11px', color: '#888', display: 'block', marginTop: '2px' }}>Reserved for: {selectedTable.name} ({selectedTable.guests} Guests)</span>}
           </div>
-          <p style={{margin:0, fontSize:'10px', color:'#5a5f7a'}}>● LIVE SYNC</p>
+
+          {/* QUICK STATUS ACTION BUTTONS */}
+          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
+            <button onClick={() => handleStatusChange('Occupied')} style={{ padding: '8px 12px', background: 'rgba(212,175,55,0.15)', border: '1px solid #D4AF37', color: '#D4AF37', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>
+              Mark Occupied
+            </button>
+            <button onClick={() => handleStatusChange('Reserved')} style={{ padding: '8px 12px', background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#60a5fa', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>
+              Mark Reserved
+            </button>
+            <button onClick={() => handleStatusChange('Available')} style={{ padding: '8px 12px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#34d399', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>
+              Mark Available
+            </button>
+            
+            <button onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px' }}>
+              + NEW RESERVATION
+            </button>
+          </div>
         </div>
 
-        {selected && (
-          <div style={{marginTop:'14px', background:'#161a26', border:'1px solid #2a2e40', borderRadius:'16px', padding:'14px', display:'flex', justifyContent:'space-between', alignItems:'center'}}>
-            <div>
-              <p style={{margin:0, fontSize:'13px', fontWeight:'bold'}}>Table {selected.id} • {selected.status}</p>
-              <p style={{margin:'2px 0 0 0', fontSize:'11px', color:'#8b8fa3'}}>{selected.name || 'No guest'} {selected.time ? `• ${selected.time}` : ''}</p>
-            </div>
-            <div style={{fontSize:'11px', color:'#fbbf24'}}>Tap again to change →</div>
-          </div>
-        )}
       </div>
+
+      {/* POPUP MODAL FOR NEW RESERVATION */}
+      {isModalOpen && (
+        <div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }}>
+          <div style={{ background: '#121214', border: '1px solid #D4AF37', borderRadius: '14px', width: '100%', maxWidth: '400px', padding: '20px', boxShadow: '0 0 30px rgba(212,175,55,0.3)' }}>
+            
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+              <h3 style={{ margin: 0, color: '#F3E5AB', fontSize: '16px' }}>New Table Reservation</h3>
+              <button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '18px' }}>✕</button>
+            </div>
+
+            <form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+              <div>
+                <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Guest Name</label>
+                <input 
+                  type="text" 
+                  required 
+                  placeholder="e.g. John Doe" 
+                  value={bookingData.name} 
+                  onChange={(e) => setBookingData({ ...bookingData, name: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <div style={{ display: 'flex', gap: '10px' }}>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Guests</label>
+                  <input 
+                    type="number" 
+                    min="1" max="10" 
+                    value={bookingData.guests} 
+                    onChange={(e) => setBookingData({ ...bookingData, guests: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }}
+                  />
+                </div>
+                <div style={{ flex: 1 }}>
+                  <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Table</label>
+                  <select 
+                    value={bookingData.tableId} 
+                    onChange={(e) => setBookingData({ ...bookingData, tableId: e.target.value })}
+                    style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }}
+                  >
+                    {tables.map(t => <option key={t.id} value={t.id}>Table {t.id} ({t.status})</option>)}
+                  </select>
+                </div>
+              </div>
+
+              <div>
+                <label style={{ fontSize: '11px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Reservation Time</label>
+                <input 
+                  type="text" 
+                  value={bookingData.time} 
+                  onChange={(e) => setBookingData({ ...bookingData, time: e.target.value })}
+                  style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }}
+                />
+              </div>
+
+              <button type="submit" style={{ marginTop: '8px', padding: '10px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>
+                Confirm Reservation
+              </button>
+            </form>
+
+          </div>
+        </div>
+      )}
+
+      <p style={{ fontSize: '11px', color: '#777', marginTop: '12px', textAlign: 'center' }}>
+        Swipe left/right to view full floor plan • Tap any table to manage status
+      </p>
+
     </div>
   );
 }
