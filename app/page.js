@@ -1,102 +1,102 @@
-// GOLD FINAL - REALTIME LIVE - FIXED FOR top_pos/left_pos
-'use client';
-import React, { useState, useEffect } from 'react';
-import { supabase } from './lib/supabase';
+"use client";
+import { useState, useEffect } from "react";
 
-export default function Page() {
-  const [tables, setTables] = useState([
-    { id: 'T1', top: '48%', left: '33%', status: 'Occupied', guests: 2, time: '35m', name: 'John Doe' },
-    { id: 'T2', top: '56%', left: '42%', status: 'Available', seats: 4 },
-    { id: 'T3', top: '43%', left: '67%', status: 'Occupied', guests: 4, time: '52m', name: 'Alexander' },
-    { id: 'T4', top: '58%', left: '61%', status: 'Occupied', guests: 4, time: '20m', name: 'Sarah K.' },
-    { id: 'T5', top: '65%', left: '52%', status: 'Occupied', guests: 2, time: '15m', name: 'Michael' },
-    { id: 'T6', top: '48%', left: '77%', status: 'Reserved', time: '8:00 PM', name: 'David L.' },
-    { id: 'T7', top: '56%', left: '86%', status: 'Reserved', time: '8:30 PM', name: 'Emma W.' },
-  ]);
-  const [selectedTableId, setSelectedTableId] = useState('T3');
-  const [isModalOpen, setIsModalOpen] = useState(false);
-  const [bookingData, setBookingData] = useState({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
+export default function Page(){
+const [t,setT]=useState(0);
+useEffect(()=>{const i=setInterval(()=>setT(v=>v+1),40);return()=>clearInterval(i)},[]);
 
-  useEffect(() => {
-    const auth = localStorage.getItem('gold_auth');
-    if (!auth) { window.location.href = '/login'; }
-  }, []);
+const tables=[
+{x:12,y:12,o:1,g:2,type:'square'},
+{x:42,y:8,o:0,g:0,type:'square'},
+{x:72,y:18,o:1,g:1,type:'round'},
+{x:12,y:38,o:1,g:4,type:'square'},
+{x:42,y:36,o:1,g:2,type:'square'},
+{x:72,y:42,o:0,g:0,type:'square'},
+{x:12,y:66,o:1,g:1,type:'round'},
+{x:42,y:68,o:0,g:0,type:'round'},
+{x:72,y:68,o:0,g:0,type:'square'},
+];
 
-  // REALTIME GOLD - 2 phones auto sync
-  useEffect(() => {
-    const fetchTables = async () => {
-      const { data } = await supabase.from('tables').select('*');
-      if (data) {
-        setTables(prev => prev.map(p => {
-          const f = data.find(d => d.id === p.id);
-          if (!f) return p;
-          return {...p, status: f.status, guests: f.guests, time: f.time, name: f.name, top: f.top_pos || p.top, left: f.left_pos || p.left, seats: f.seats || p.seats };
-        }));
-      }
-    };
-    fetchTables();
+return(<div style={{background:'#050400',minHeight:'100vh',fontFamily:'Inter, system-ui',color:'#FFF',overflowX:'hidden'}}>
+<div style={{maxWidth:1400,margin:'0 auto',padding:'18px 24px',display:'flex',justifyContent:'space-between',alignItems:'center',position:'sticky',top:0,zIndex:50,background:'rgba(5,4,0,0.85)',backdropFilter:'blur(20px)',borderBottom:'1px solid #1A160A'}}>
+<h1 style={{fontSize:28,fontWeight:900,margin:0,background:'linear-gradient(90deg,#FFF6CC 0%,#FFD86B 40%,#FFA800 100%)',WebkitBackgroundClip:'text',WebkitTextFillColor:'transparent'}}>TableNest</h1>
+<div style={{display:'flex',gap:10,alignItems:'center'}}>
+<a href="#pricing" style={{background:'#FFF',color:'#000',padding:'10px 18px',borderRadius:10,textDecoration:'none',fontWeight:800,fontSize:13}}>Start 7-Day Free Trial</a>
+</div>
+</div>
 
-    const channel = supabase
-     .channel('gold-tables-live')
-     .on('postgres_changes', { event: 'UPDATE', schema: 'public', table: 'tables' }, (payload) => {
-        const n = payload.new;
-        setTables(prev => prev.map(t => t.id === n.id? {...t, status: n.status, guests: n.guests, time: n.time, name: n.name } : t));
-      })
-     .subscribe();
+<div style={{maxWidth:1400,margin:'0 auto',padding:'0 24px'}}>
+<div style={{display:'grid',gridTemplateColumns:'1.2fr 1fr',gap:0,marginTop:18}}>
+<div style={{perspective:'2000px',perspectiveOrigin:'50% 40%'}}>
+<div style={{position:'relative',width:'100%',height:560,transform:'rotateX(58deg) rotateZ(-38deg)',transformStyle:'preserve-3d',background:'radial-gradient(ellipse at 30% 20%, #1E1A0A 0%, #0D0B05 40%, #050400 100%)',borderRadius:28,border:'1px solid #2A2415',boxShadow:'0 60px 120px rgba(0,0,0,0.9), inset 0 0 80px rgba(255,184,0,0.08)',overflow:'hidden'}}>
+<div style={{position:'absolute',inset:0,background:`linear-gradient(rgba(255,184,0,0.06) 1px, transparent 1px), linear-gradient(90deg, rgba(255,184,0,0.06) 1px, transparent 1px)`,backgroundSize:'48px 48px',transform:'translateZ(1px)'}}/>
+{tables.map((tb,i)=>(
+<div key={i} style={{position:'absolute',left:`${tb.x}%`,top:`${tb.y}%`,transformStyle:'preserve-3d',transform:`translateZ(${tb.o?22:6}px)`}}>
+<div style={{width:tb.type=='round'?64:68,height:tb.type=='round'?64:68,background:tb.o?'radial-gradient(ellipse at 30% 20%, #FFF6CC, #FFDF8A 20%, #FFB800 70%)':'linear-gradient(135deg,#1E1A0A,#2A2415)',border:`1px solid ${tb.o?'#FFD86B':'#3A2F15'}`,borderRadius:tb.type=='round'? '50%':8,transform:'translateZ(12px)',boxShadow:tb.o?'0 0 25px rgba(255,184,0,0.6)':'none',display:'flex',flexDirection:'column',alignItems:'center',justifyContent:'center'}}>
+<div style={{fontSize:8,fontWeight:900,color:tb.o?'#000':'#5A4A20'}}>T0{i+1}</div>
+{tb.o&&<div style={{fontSize:6,color:'#000',opacity:0.7}}>{tb.g} Guests</div>}
+</div>
+{[0,1,2,3].map(c=>{
+const pos=c==0?{x:-20,y:16}:c==1?{x:68,y:16}:c==2?{x:16,y:-20}:{x:16,y:68};
+return(<div key={c} style={{position:'absolute',left:pos.x,top:pos.y,transform:'translateZ(4px)'}}><div style={{width:18,height:16,background:'#2A2415',border:'1px solid #3A2F15',borderRadius:3,transform:'translateZ(6px)'}}/></div>)
+})}
+{Array.from({length:tb.g}).map((_,gidx)=>{
+const gx=gidx==0?-10:gidx==1?60:gidx==2?8:42; const gy=gidx==0?8:gidx==1?8:gidx==2?58:58;
+return(<div key={gidx} style={{position:'absolute',left:gx,top:gy,width:12,height:12,background: gidx%2==0?'radial-gradient(#FFDF8A,#FFB800)':'radial-gradient(#8AB4FF,#3A6BFF)',borderRadius:'50%',transform:'translateZ(20px)'}}/>)
+})}
+</div>
+))}
+</div>
+<div style={{marginTop:12,display:'flex',gap:12,fontSize:10,color:'#8A7A55',justifyContent:'center'}}><span>🟢 Free</span><span>🔴 Busy</span><span>🟡 Reserved</span><span style={{color:'#5A4A20'}}>3D Live Demo</span></div>
+</div>
 
-    return () => { supabase.removeChannel(channel); };
-  }, []);
+<div style={{padding:'10px 20px'}}>
+<div style={{background:'rgba(255,216,107,0.12)',border:'1px solid #2A2415',display:'inline-block',padding:'6px 12px',borderRadius:20,fontSize:10,color:'#FFDF8A',fontWeight:700,letterSpacing:1}}>3D RESTAURANT OS • LIVE DEMO</div>
+<h1 style={{fontSize:48,fontWeight:900,lineHeight:'0.95',margin:'18px 0',letterSpacing:-1}}>Manage Tables<br/>in Real 3D.</h1>
+<p style={{color:'#8A7A55',fontSize:15,lineHeight:1.5}}>TableNest is the first 3D table management SaaS. See your full floor live, manage waiters, orders and revenue in one luxury dashboard.</p>
+<div style={{marginTop:22,display:'flex',flexDirection:'column',gap:10,fontSize:13}}>
+<div>✓ Real-time 3D Floor Plan</div><div>✓ Waiter & Order Sync (No Walk to Kitchen)</div><div>✓ Kitchen Bell + Ready Notification</div><div>✓ Owner Revenue & Privacy Protected</div>
+</div>
+<div style={{display:'flex',gap:10,marginTop:24}}>
+<a href="#pricing" style={{flex:1,background:'linear-gradient(135deg,#FFDF8A,#FFB800)',color:'#000',padding:'14px',borderRadius:12,textAlign:'center',fontWeight:900,textDecoration:'none'}}>Start Free Trial</a>
+<a href="#how" style={{flex:1,background:'#1A160A',border:'1px solid #2A2415',color:'#FFDF8A',padding:'14px',borderRadius:12,textAlign:'center',fontWeight:700,textDecoration:'none'}}>How it Works</a>
+</div>
+<div style={{marginTop:14,fontSize:10,color:'#5A4A20'}}>No credit card for trial • Cancel anytime</div>
+</div>
+</div>
 
-  const selectedTable = tables.find(t => t.id === selectedTableId) || tables[0];
+<div id="about" style={{marginTop:70,display:'grid',gridTemplateColumns:'1fr 1fr',gap:16}}>
+<div style={{background:'rgba(8,6,0,0.92)',border:'1px solid #2A2415',borderRadius:20,padding:22}}>
+<div style={{fontSize:11,letterSpacing:1.5,color:'#8A7A55'}}>WHAT IS TABLENEST?</div>
+<h2 style={{fontSize:26,fontWeight:900,marginTop:10}}>Table + Nest = Your Restaurant's Home.</h2>
+<p style={{color:'#8A7A55',fontSize:13,lineHeight:1.6,marginTop:10}}>TableNest is not just a table app. It is a complete restaurant operating system. Owners manage revenue, staff manage orders, kitchen manages cooking — all in 3D. Every hotel's data is private and protected.</p>
+<ul style={{marginTop:12,fontSize:13,lineHeight:1.8,color:'#E9C77A',paddingLeft:18}}>
+<li>Manages Tables, Waiters, Orders, Kitchen, Billing</li><li>Dine-in vs Parcel Mode</li><li>Real-time Status: New → Cooking → Ready → Served</li><li>Privacy First: Hotels can't see each other's data</li>
+</ul>
+</div>
+<div style={{background:'linear-gradient(135deg,#1A160A,#0D0B05)',border:'1px solid #2A2415',borderRadius:20,padding:22}}>
+<div style={{fontSize:11,letterSpacing:1.5,color:'#8A7A55'}}>HOW IT WORKS</div>
+<h2 id="how" style={{fontSize:26,fontWeight:900,marginTop:10}}>From Table to Served in 4 Steps.</h2>
+<div style={{marginTop:16,display:'flex',flexDirection:'column',gap:12}}>
+<div style={{display:'flex',gap:12}}><div style={{width:28,height:28,background:'#FFD86B',color:'#000',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:12}}>1</div><div><div style={{fontWeight:800,fontSize:13}}>Customer → Waiter</div><div style={{fontSize:12,color:'#8A7A55',marginTop:2}}>Customer tells order manually to waiter.</div></div></div>
+<div style={{display:'flex',gap:12}}><div style={{width:28,height:28,background:'#FFD86B',color:'#000',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:12}}>2</div><div><div style={{fontWeight:800,fontSize:13}}>Waiter → System</div><div style={{fontSize:12,color:'#8A7A55',marginTop:2}}>Waiter enters Table, Name, Dine/Parcel + Items. Bill auto-calculates.</div></div></div>
+<div style={{display:'flex',gap:12}}><div style={{width:28,height:28,background:'#FFD86B',color:'#000',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:12}}>3</div><div><div style={{fontWeight:800,fontSize:13}}>System → Kitchen Bell</div><div style={{fontSize:12,color:'#8A7A55',marginTop:2}}>Kitchen gets instant order with bell sound. Accept → Cooking → Ready.</div></div></div>
+<div style={{display:'flex',gap:12}}><div style={{width:28,height:28,background:'#FFD86B',color:'#000',borderRadius:'50%',display:'flex',alignItems:'center',justifyContent:'center',fontWeight:900,fontSize:12}}>4</div><div><div style={{fontWeight:800,fontSize:13}}>Ready → Served</div><div style={{fontSize:12,color:'#8A7A55',marginTop:2}}>Waiter gets Ready notification, picks from kitchen, marks Served.</div></div></div>
+</div>
+</div>
+</div>
 
-  const handleStatusChange = async (newStatus) => {
-    setTables(tables.map(t => t.id === selectedTableId? {...t, status: newStatus } : t));
-    await supabase.from("tables").update({ status: newStatus }).eq("id", selectedTableId);
-  };
+<div id="pricing" style={{marginTop:70}}>
+<div style={{textAlign:'center'}}><div style={{fontSize:11,letterSpacing:2,color:'#8A7A55'}}>PRICING</div><h2 style={{fontSize:36,fontWeight:900,marginTop:8}}>Start Free. Scale Fast.</h2><p style={{color:'#8A7A55',marginTop:6}}>7-Day Free Trial on all plans. No credit card required.</p></div>
+<div style={{display:'grid',gridTemplateColumns:'repeat(4,1fr)',gap:12,marginTop:24}}>
+<div style={{background:'#0C0A05',border:'1px solid #2A2415',borderRadius:18,padding:18,textAlign:'center'}}><div style={{fontSize:11,fontWeight:800,color:'#8A7A55'}}>TRIAL</div><div style={{fontSize:28,fontWeight:900,color:'#FFDF8A',marginTop:6}}>$0</div><div style={{fontSize:11,color:'#8A7A55'}}>7 Days Free</div><div style={{marginTop:12,textAlign:'left'}}><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ 16 Tables 3D</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Order Panel</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Kitchen Bell</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Owner Dashboard</div></div><button style={{width:'100%',marginTop:16,background:'#1A160A',color:'#FFDF8A',border:'1px solid #2A2415',borderRadius:10,padding:'12px',fontWeight:800,fontSize:12}}>Start Free Trial</button></div>
+<div style={{background:'#0C0A05',border:'1px solid #2A2415',borderRadius:18,padding:18,textAlign:'center'}}><div style={{fontSize:11,fontWeight:800,color:'#8A7A55'}}>STARTER</div><div style={{fontSize:28,fontWeight:900,color:'#FFDF8A',marginTop:6}}>$29/mo</div><div style={{fontSize:11,color:'#8A7A55'}}>For small cafes</div><div style={{marginTop:12,textAlign:'left'}}><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ 30 Tables</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Unlimited Orders</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Staff Accounts</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Email Support</div></div><button style={{width:'100%',marginTop:16,background:'#1A160A',color:'#FFDF8A',border:'1px solid #2A2415',borderRadius:10,padding:'12px',fontWeight:800,fontSize:12}}>Choose Starter</button></div>
+<div style={{background:'linear-gradient(135deg,#221D0F,#1A160A)',border:'2px solid #FFD86B',borderRadius:18,padding:18,textAlign:'center',transform:'scale(1.05)',boxShadow:'0 0 40px rgba(255,184,0,0.25)'}}><div style={{fontSize:11,fontWeight:800,color:'#FFDF8A'}}>PRO - POPULAR</div><div style={{fontSize:28,fontWeight:900,color:'#FFDF8A',marginTop:6}}>$79/mo</div><div style={{fontSize:11,color:'#8A7A55'}}>Most Popular</div><div style={{marginTop:12,textAlign:'left'}}><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ 100 Tables</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Revenue Analytics</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Parcel + Dine-in</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Priority Support</div></div><button style={{width:'100%',marginTop:16,background:'linear-gradient(135deg,#FFDF8A,#FFB800)',color:'#000',border:'0',borderRadius:10,padding:'12px',fontWeight:800,fontSize:12}}>Choose Pro</button></div>
+<div style={{background:'#0C0A05',border:'1px solid #2A2415',borderRadius:18,padding:18,textAlign:'center'}}><div style={{fontSize:11,fontWeight:800,color:'#8A7A55'}}>ENTERPRISE</div><div style={{fontSize:28,fontWeight:900,color:'#FFDF8A',marginTop:6}}>$199/mo</div><div style={{fontSize:11,color:'#8A7A55'}}>For chains</div><div style={{marginTop:12,textAlign:'left'}}><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Unlimited Hotels</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ Super Admin Panel</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ API Access</div><div style={{fontSize:12,color:'#E9C77A',marginTop:6}}>✓ 24/7 Support</div></div><button style={{width:'100%',marginTop:16,background:'#1A160A',color:'#FFDF8A',border:'1px solid #2A2415',borderRadius:10,padding:'12px',fontWeight:800,fontSize:12}}>Choose Enterprise</button></div>
+</div>
+</div>
 
-  const handleBookingSubmit = async (e) => {
-    e.preventDefault();
-    const updates = { status: 'Reserved', guests: parseInt(bookingData.guests), time: bookingData.time, name: bookingData.name };
-    setTables(tables.map(t => t.id === bookingData.tableId? {...t,...updates } : t));
-    await supabase.from("tables").update(updates).eq("id", bookingData.tableId);
-    setIsModalOpen(false);
-    setBookingData({ name: '', guests: '2', time: '8:00 PM', tableId: 'T2' });
-  };
-
-  return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#070707', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '16px', display: 'flex', flexDirection: 'column', alignItems: 'center' }}>
-      <div style={{ width: '100%', maxWidth: '1100px', display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #222', paddingBottom: '12px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px' }}>
-          <div style={{ width: '36px', height: '36px', borderRadius: '8px', border: '1px solid #D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'rgba(212,175,55,0.1)', color: '#D4AF37', fontWeight: 'bold' }}>💎</div>
-          <div><h1 style={{ margin: 0, fontSize: '16px', letterSpacing: '2px', color: '#F3E5AB', fontWeight: 'bold' }}>TableNest</h1><p style={{ margin: 0, fontSize: '10px', color: '#888', letterSpacing: '1px' }}>PREMIUM HOSPITALITY SaaS • REALTIME LIVE</p></div>
-        </div>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-          <div style={{ display: 'flex', alignItems: 'center', gap: '8px', fontSize: '11px', color: '#aaa', background: '#141414', padding: '6px 14px', borderRadius: '20px', border: '1px solid #2a2a2a' }}><span style={{ width: '8px', height: '8px', backgroundColor: '#2ecc71', borderRadius: '50%', display: 'inline-block', boxShadow: '0 0 6px #2ecc71', animation: 'pulse 1.5s infinite' }}></span><span>LIVE • REALTIME</span></div>
-          <button onClick={() => { localStorage.removeItem('gold_auth'); window.location.href = '/login'; }} style={{ padding: '6px 12px', background: 'rgba(255,0,0,0.1)', border: '1px solid #ff4444', color: '#ff4444', borderRadius: '20px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>LOGOUT</button>
-        </div>
-      </div>
-      <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', paddingBottom: '10px' }}>
-        <div style={{ position: 'relative', minWidth: '700px', width: '100%', maxWidth: '1100px', margin: '0 auto', borderRadius: '14px', border: '1px solid #333', boxShadow: '0 0 25px rgba(212,175,55,0.2)', background: '#0d0d0d' }}>
-          <img src="/hero-ultra.webp" alt="TableNest 3D Floor Plan" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '14px' }} />
-          {tables.map((t) => {
-            const isSelected = selectedTableId === t.id;
-            const statusColor = t.status === 'Occupied'? '#D4AF37' : t.status === 'Reserved'? '#3b82f6' : '#10b981';
-            return (<div key={t.id} onClick={() => setSelectedTableId(t.id)} style={{ position: 'absolute', top: t.top, left: t.left, transform: 'translate(-50%, -50%)', cursor: 'pointer', padding: '6px 12px', borderRadius: '20px', background: isSelected? statusColor : 'rgba(0,0,0,0.85)', color: isSelected? '#000' : '#F3E5AB', border: `1px solid ${statusColor}`, fontSize: '10px', fontWeight: 'bold', boxShadow: isSelected? `0 0 15px ${statusColor}` : '0 4px 12px rgba(0,0,0,0.9)', whiteSpace: 'nowrap', zIndex: 10 }}>{t.id} • {t.status} {t.guests? `(${t.guests})` : ''}</div>);
-          })}
-        </div>
-      </div>
-      <div style={{ width: '100%', maxWidth: '1100px', background: '#111', border: '1px solid #2a2a2a', borderRadius: '12px', padding: '16px 20px', marginTop: '14px' }}>
-        <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', flexWrap: 'wrap', gap: '12px' }}>
-          <div><span style={{ fontSize: '10px', color: '#888', letterSpacing: '1px', display: 'block' }}>MANAGE SELECTED TABLE</span><span style={{ fontSize: '16px', fontWeight: 'bold', color: '#F3E5AB' }}>Table {selectedTable.id}</span><span style={{ fontSize: '12px', color: '#aaa', marginLeft: '10px' }}>Current: <b style={{ color: selectedTable.status === 'Occupied'? '#D4AF37' : selectedTable.status === 'Reserved'? '#3b82f6' : '#10b981' }}>{selectedTable.status}</b></span></div>
-          <div style={{ display: 'flex', gap: '8px', flexWrap: 'wrap' }}>
-            <button onClick={() => handleStatusChange('Occupied')} style={{ padding: '8px 12px', background: 'rgba(212,175,55,0.15)', border: '1px solid #D4AF37', color: '#D4AF37', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>Mark Occupied</button>
-            <button onClick={() => handleStatusChange('Reserved')} style={{ padding: '8px 12px', background: 'rgba(59,130,246,0.15)', border: '1px solid #3b82f6', color: '#60a5fa', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>Mark Reserved</button>
-            <button onClick={() => handleStatusChange('Available')} style={{ padding: '8px 12px', background: 'rgba(16,185,129,0.15)', border: '1px solid #10b981', color: '#34d399', borderRadius: '6px', fontSize: '11px', cursor: 'pointer', fontWeight: 'bold' }}>Mark Available</button>
-            <button onClick={() => setIsModalOpen(true)} style={{ padding: '8px 16px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px' }}>+ NEW RESERVATION</button>
-          </div>
-        </div>
-      </div>
-      {isModalOpen && (<div style={{ position: 'fixed', inset: 0, background: 'rgba(0,0,0,0.85)', backdropFilter: 'blur(5px)', display: 'flex', alignItems: 'center', justifyContent: 'center', zIndex: 100, padding: '16px' }}><div style={{ background: '#121214', border: '1px solid #D4AF37', borderRadius: '14px', width: '100%', maxWidth: '400px', padding: '20px' }}><div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}><h3 style={{ margin: 0, color: '#F3E5AB', fontSize: '16px' }}>New Table Reservation</h3><button onClick={() => setIsModalOpen(false)} style={{ background: 'none', border: 'none', color: '#888', cursor: 'pointer', fontSize: '18px' }}>✕</button></div><form onSubmit={handleBookingSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}><input type="text" required placeholder="Guest Name" value={bookingData.name} onChange={(e) => setBookingData({...bookingData, name: e.target.value})} style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px' }} /><div style={{ display: 'flex', gap: '10px' }}><input type="number" min="1" max="10" value={bookingData.guests} onChange={(e) => setBookingData({...bookingData, guests: e.target.value})} style={{ flex: 1, padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px' }} /><select value={bookingData.tableId} onChange={(e) => setBookingData({...bookingData, tableId: e.target.value})} style={{ flex: 1, padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px' }}>{tables.map(t => <option key={t.id} value={t.id}>Table {t.id} ({t.status})</option>)}</select></div><input type="text" value={bookingData.time} onChange={(e) => setBookingData({...bookingData, time: e.target.value})} style={{ width: '100%', padding: '8px 12px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '12px' }} /><button type="submit" style={{ marginTop: '8px', padding: '10px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>Confirm Reservation</button></form></div></div>)}
-    </div>
-  );
+<div style={{textAlign:'center',marginTop:40,padding:'20px',borderTop:'1px solid #1A160A',fontSize:10,color:'#3A2F15'}}>© 2026 TableNest • Ultra 3D Engine • Privacy Protected</div>
+</div>
+</div>)
 }
