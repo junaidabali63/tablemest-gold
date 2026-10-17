@@ -20,19 +20,19 @@ export default function TableNestPinPOS() {
     kitchen: '3333'
   });
 
-  // Real-time Dynamic Tables with capacity (seats)
+  // Tables State with live real-time sync
   const [tables, setTables] = useState([
-    { id: 'T1', top: '48%', left: '33%', status: 'Occupied', type: 'Dine-In', seats: 4, guest: 'John Doe', items: [{ name: 'Wagyu Ribeye Steak', price: 85 }, { name: 'Vintage Gold Wine', price: 150 }], orderState: 'Served', payment: 'Paid' },
-    { id: 'T2', top: '56%', left: '42%', status: 'Available', type: 'Dine-In', seats: 4, guest: '', items: [], orderState: 'None', payment: 'Unpaid' },
-    { id: 'T3', top: '43%', left: '67%', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Alexander', items: [{ name: 'Truffle Lobster Pasta', price: 75 }], orderState: 'Cooking', payment: 'Unpaid' },
-    { id: 'T4', top: '58%', left: '61%', status: 'Occupied', type: 'Parcel', seats: 4, guest: 'Sarah K.', items: [{ name: 'Black Caviar Starter', price: 110 }], orderState: 'Ready to Serve', payment: 'Paid' },
-    { id: 'T5', top: '65%', left: '52%', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Michael', items: [{ name: 'Chef Signature Combo', price: 130 }], orderState: 'Ordering', payment: 'Unpaid' },
-    { id: 'T6', top: '48%', left: '77%', status: 'Reserved', type: 'Dine-In', seats: 2, guest: 'David L.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:00 PM' },
-    { id: 'T7', top: '56%', left: '86%', status: 'Reserved', type: 'Dine-In', seats: 4, guest: 'Emma W.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:30 PM' },
+    { id: 'T1', status: 'Occupied', type: 'Dine-In', seats: 4, guest: 'John Doe', items: [{ name: 'Wagyu Ribeye', price: 85 }, { name: 'Vintage Wine', price: 150 }], orderState: 'Served' },
+    { id: 'T2', status: 'Available', type: 'Dine-In', seats: 4, guest: '', items: [], orderState: 'None' },
+    { id: 'T3', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Alexander', items: [{ name: 'Truffle Pasta', price: 75 }], orderState: 'Cooking' },
+    { id: 'T4', status: 'Occupied', type: 'Parcel', seats: 4, guest: 'Sarah K.', items: [{ name: 'Caviar Starter', price: 110 }], orderState: 'Ready to Serve' },
+    { id: 'T5', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Michael', items: [{ name: 'Signature Combo', price: 130 }], orderState: 'Ordering' },
+    { id: 'T6', status: 'Reserved', type: 'Dine-In', seats: 2, guest: 'David L.', items: [], orderState: 'None' },
+    { id: 'T7', status: 'Reserved', type: 'Dine-In', seats: 4, guest: 'Emma W.', items: [], orderState: 'None' },
   ]);
 
   const [orderForm, setOrderForm] = useState({ tableId: 'T2', guestName: '', orderType: 'Dine-In', itemName: 'Wagyu Ribeye Steak', itemPrice: 85 });
-  const [settingsForm, setSettingsForm] = useState({ hotelName: hotelInfo.hotelName, ownerName: hotelInfo.ownerName, email: hotelInfo.email, oldPass: '', newPass: '', confirmPass: '', newWaiterPin: staffPins.waiter, newKitchenPin: staffPins.kitchen });
+  const [settingsForm, setSettingsForm] = useState({ hotelName: hotelInfo.hotelName, ownerName: hotelInfo.ownerName, email: hotelInfo.email, newWaiterPin: staffPins.waiter, newKitchenPin: staffPins.kitchen });
   const [settingsMsg, setSettingsMsg] = useState('');
 
   // PIN Gateway Handler
@@ -53,7 +53,7 @@ export default function TableNestPinPOS() {
     }
   };
 
-  // Waiter Order Placement Handler (Real-Time Sync)
+  // Waiter Order Placement Handler
   const handleWaiterPlaceOrder = (e) => {
     e.preventDefault();
     setTables(tables.map(t => {
@@ -65,13 +65,12 @@ export default function TableNestPinPOS() {
           type: orderForm.orderType,
           guest: orderForm.guestName || 'Walk-in Guest',
           items: [...t.items, newItem],
-          orderState: 'Cooking',
-          payment: 'Unpaid'
+          orderState: 'Cooking'
         };
       }
       return t;
     }));
-    alert(`Order dispatched for Table ${orderForm.tableId}! Real-time revenue & occupancy updated. 🔔`);
+    alert(`Order dispatched for Table ${orderForm.tableId}! 🔔`);
     setOrderForm({ tableId: 'T2', guestName: '', orderType: 'Dine-In', itemName: 'Wagyu Ribeye Steak', itemPrice: 85 });
   };
 
@@ -81,29 +80,12 @@ export default function TableNestPinPOS() {
 
   const handleSettingsUpdate = (e) => {
     e.preventDefault();
-    setSettingsMsg('');
-    if (settingsForm.newPass) {
-      if (settingsForm.oldPass !== ownerPassword) {
-        setSettingsMsg('❌ Incorrect current password.');
-        return;
-      }
-      if (settingsForm.newPass.length < 4) {
-        setSettingsMsg('❌ Password must be at least 4 characters.');
-        return;
-      }
-      if (settingsForm.newPass !== settingsForm.confirmPass) {
-        setSettingsMsg('❌ Passwords do not match.');
-        return;
-      }
-      setOwnerPassword(settingsForm.newPass);
-    }
-
     setHotelInfo({ ...hotelInfo, hotelName: settingsForm.hotelName, ownerName: settingsForm.ownerName, email: settingsForm.email });
     setStaffPins({ ...staffPins, waiter: settingsForm.newWaiterPin, kitchen: settingsForm.newKitchenPin });
-    setSettingsMsg('✓ Settings updated successfully!');
+    setSettingsMsg('✓ Settings & PINs updated successfully!');
   };
 
-  // REAL-TIME CALCULATIONS
+  // Real-Time Calculations
   const totalOccupiedBill = tables.reduce((sum, t) => sum + t.items.reduce((iSum, i) => iSum + i.price, 0), 0);
   const totalRevenue = 5480 + totalOccupiedBill;
   const netProfit = Math.round(totalRevenue * 0.42);
@@ -117,40 +99,40 @@ export default function TableNestPinPOS() {
   const availableCount = tables.filter(t => t.status === 'Available').length;
 
   return (
-    <div style={{ minHeight: '100vh', backgroundColor: '#070707', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '12px', boxSizing: 'border-box' }}>
+    <div style={{ minHeight: '100vh', backgroundColor: '#050505', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '14px', boxSizing: 'border-box' }}>
       
-      {/* HEADER */}
-      <div style={{ maxWidth: '1200px', margin: '0 auto 14px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid #222', paddingBottom: '10px', flexWrap: 'wrap', gap: '8px' }}>
-        <div style={{ display: 'flex', alignItems: 'center', gap: '10px', cursor: 'pointer' }} onClick={() => setCurrentView('pin_gateway')}>
-          <div style={{ width: '38px', height: '38px', borderRadius: '10px', border: '1px solid #D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(212,175,55,0.2), rgba(0,0,0,0.8))', color: '#D4AF37', fontSize: '18px' }}>
+      {/* 3D LUXURY HEADER */}
+      <div style={{ maxWidth: '1200px', margin: '0 auto 16px auto', display: 'flex', justifyContent: 'space-between', alignItems: 'center', borderBottom: '1px solid rgba(212,175,55,0.2)', paddingBottom: '12px', flexWrap: 'wrap', gap: '10px' }}>
+        <div style={{ display: 'flex', alignItems: 'center', gap: '12px', cursor: 'pointer' }} onClick={() => setCurrentView('pin_gateway')}>
+          <div style={{ width: '40px', height: '40px', borderRadius: '12px', border: '1px solid #D4AF37', display: 'flex', alignItems: 'center', justifyContent: 'center', background: 'linear-gradient(135deg, rgba(212,175,55,0.3), rgba(0,0,0,0.9))', color: '#D4AF37', fontSize: '18px', boxShadow: '0 0 15px rgba(212,175,55,0.3)' }}>
             💎
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '15px', letterSpacing: '1px', color: '#F3E5AB', fontWeight: 'bold' }}>{hotelInfo.hotelName}</h1>
-            <p style={{ margin: 0, fontSize: '8px', color: '#888', letterSpacing: '1px' }}>POS REAL-TIME SYSTEM</p>
+            <p style={{ margin: 0, fontSize: '8px', color: '#888', letterSpacing: '1px' }}>LUXURY 3D POS SYSTEM</p>
           </div>
         </div>
 
-        <div style={{ display: 'flex', gap: '6px', alignItems: 'center', flexWrap: 'wrap' }}>
+        <div style={{ display: 'flex', gap: '8px', alignItems: 'center', flexWrap: 'wrap' }}>
           {currentView !== 'pin_gateway' && (
-            <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 12px', background: '#1c1c1e', border: '1px solid #333', color: '#aaa', borderRadius: '16px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>
+            <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 14px', background: '#141414', border: '1px solid #333', color: '#aaa', borderRadius: '20px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>
               🔒 Lock Terminal
             </button>
           )}
-          <button onClick={() => setCurrentView('landing')} style={{ padding: '6px 12px', background: '#141414', border: '1px solid #D4AF37', color: '#D4AF37', borderRadius: '16px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>
-            🌐 Landing
+          <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 14px', background: 'linear-gradient(135deg, #D4AF37, #AA771C)', color: '#000', border: 'none', borderRadius: '20px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>
+            🔑 PIN Gateway
           </button>
         </div>
       </div>
 
-      {/* PIN GATEWAY */}
+      {/* 1. PIN GATEWAY */}
       {currentView === 'pin_gateway' && (
-        <div style={{ maxWidth: '360px', margin: '40px auto', background: '#111', border: '1px solid #D4AF37', borderRadius: '16px', padding: '20px', boxShadow: '0 0 30px rgba(212,175,55,0.2)', textAlign: 'center' }}>
-          <div style={{ fontSize: '28px', marginBottom: '8px' }}>🔐</div>
+        <div style={{ maxWidth: '380px', margin: '50px auto', background: '#0d0d0d', border: '1px solid #D4AF37', borderRadius: '18px', padding: '24px', boxShadow: '0 0 40px rgba(212,175,55,0.2)', textAlign: 'center' }}>
+          <div style={{ fontSize: '32px', marginBottom: '10px' }}>🔐</div>
           <h2 style={{ color: '#F3E5AB', fontSize: '18px', margin: '0 0 6px 0' }}>Enter POS Staff PIN</h2>
-          <p style={{ fontSize: '11px', color: '#888', marginBottom: '16px' }}>Enter 4-digit PIN for Owner, Waiter, or Kitchen.</p>
+          <p style={{ fontSize: '11px', color: '#888', marginBottom: '20px' }}>Enter 4-digit PIN to access authorized screen.</p>
 
-          <form onSubmit={handlePinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '10px' }}>
+          <form onSubmit={handlePinSubmit} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <input 
               type="password" 
               maxLength="4"
@@ -159,116 +141,86 @@ export default function TableNestPinPOS() {
               placeholder="••••" 
               value={enteredPin} 
               onChange={(e) => setEnteredPin(e.target.value)}
-              style={{ width: '100%', padding: '12px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#D4AF37', fontSize: '22px', textAlign: 'center', letterSpacing: '6px', boxSizing: 'border-box' }}
+              style={{ width: '100%', padding: '14px', background: '#000', border: '1px solid #333', borderRadius: '10px', color: '#D4AF37', fontSize: '24px', textAlign: 'center', letterSpacing: '8px', boxSizing: 'border-box' }}
             />
             {pinError && <p style={{ fontSize: '11px', color: '#e74c3c', margin: 0 }}>{pinError}</p>}
-            <button type="submit" style={{ padding: '10px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>
+            <button type="submit" style={{ padding: '12px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
               Unlock Terminal 🔓
             </button>
           </form>
 
-          <div style={{ marginTop: '16px', borderTop: '1px solid #222', paddingTop: '10px', fontSize: '10px', color: '#666', textAlign: 'left' }}>
-            <b>Demo PINs:</b> Owner: <code style={{ color: '#D4AF37' }}>1234</code> | Waiter: <code style={{ color: '#60a5fa' }}>2222</code> | Kitchen: <code style={{ color: '#f39c12' }}>3333</code>
+          <div style={{ marginTop: '20px', borderTop: '1px solid #222', paddingTop: '12px', fontSize: '10px', color: '#666', textAlign: 'left' }}>
+            <b>Demo PINs:</b><br />
+            • Owner: <code style={{ color: '#D4AF37' }}>1234</code><br />
+            • Waiter: <code style={{ color: '#60a5fa' }}>2222</code><br />
+            • Kitchen: <code style={{ color: '#f39c12' }}>3333</code>
           </div>
         </div>
       )}
 
-      {/* LANDING */}
-      {currentView === 'landing' && (
-        <div style={{ maxWidth: '900px', margin: '20px auto', textAlign: 'center' }}>
-          <span style={{ background: 'rgba(212,175,55,0.1)', border: '1px solid #D4AF37', padding: '5px 14px', borderRadius: '20px', fontSize: '10px', color: '#D4AF37', fontWeight: 'bold' }}>
-            ENTERPRISE RESTAURANT POS
-          </span>
-          <h2 style={{ fontSize: '30px', color: '#F3E5AB', margin: '16px 0 10px 0' }}>Immersive 3D Hospitality Management</h2>
-          <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '10px 20px', background: 'linear-gradient(to right, #D4AF37, #AA771C)', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', marginTop: '10px' }}>
-            Launch PIN Terminal 🔑
-          </button>
-        </div>
-      )}
-
-      {/* OWNER DASHBOARD (With Real-Time Dynamic Overlay Panel) */}
+      {/* 2. OWNER DASHBOARD (Clean 3D Cards Layout - No Overlapping Images) */}
       {currentView === 'owner_dashboard' && (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap', background: '#111', padding: '8px', borderRadius: '10px', border: '1px solid #222' }}>
-            <span style={{ padding: '6px 10px', background: 'rgba(212,175,55,0.2)', color: '#D4AF37', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold' }}>
-              👑 OWNER
+          <div style={{ display: 'flex', gap: '8px', marginBottom: '16px', flexWrap: 'wrap', background: '#0d0d0d', padding: '10px', borderRadius: '12px', border: '1px solid #222' }}>
+            <span style={{ padding: '6px 12px', background: 'rgba(212,175,55,0.2)', color: '#D4AF37', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold' }}>
+              👑 OWNER MODE
             </span>
-            <button onClick={() => setCurrentView('waiter_portal')} style={{ padding: '6px 10px', background: '#1c1c1e', color: '#60a5fa', border: 'none', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => setCurrentView('waiter_portal')} style={{ padding: '6px 12px', background: '#161618', color: '#60a5fa', border: '1px solid #333', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
               Waiter View 📱
             </button>
-            <button onClick={() => setCurrentView('kitchen_portal')} style={{ padding: '6px 10px', background: '#1c1c1e', color: '#f39c12', border: 'none', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => setCurrentView('kitchen_portal')} style={{ padding: '6px 12px', background: '#161618', color: '#f39c12', border: '1px solid #333', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
               Kitchen View 🍳
             </button>
-            <button onClick={() => setCurrentView('owner_settings')} style={{ padding: '6px 10px', background: '#1c1c1e', color: '#2ecc71', border: 'none', borderRadius: '6px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
+            <button onClick={() => setCurrentView('owner_settings')} style={{ padding: '6px 12px', background: '#161618', color: '#2ecc71', border: '1px solid #333', borderRadius: '8px', fontSize: '10px', fontWeight: 'bold', cursor: 'pointer' }}>
               Settings & PINs ⚙️
             </button>
           </div>
 
-          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', alignItems: 'start' }}>
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(300px, 1fr))', gap: '16px', alignItems: 'start' }}>
             
-            {/* Top Revenue Card */}
-            <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#111', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '12px', padding: '14px' }}>
+            {/* Real-Time Metrics & Revenue Card */}
+            <div style={{ display: 'flex', flexDirection: 'column', gap: '14px', background: '#0d0d0d', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '14px', padding: '18px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
               <div>
                 <span style={{ fontSize: '9px', color: '#888', letterSpacing: '1px', display: 'block' }}>TOTAL REVENUE TODAY</span>
-                <h2 style={{ margin: '4px 0 0 0', fontSize: '26px', color: '#F3E5AB', fontWeight: '800' }}>${totalRevenue.toLocaleString()}</h2>
-                <p style={{ margin: '3px 0 0 0', fontSize: '10px', color: '#2ecc71' }}>Estimated Net Profit: <b>${netProfit.toLocaleString()} (42%)</b></p>
+                <h2 style={{ margin: '4px 0 0 0', fontSize: '28px', color: '#F3E5AB', fontWeight: '800' }}>${totalRevenue.toLocaleString()}</h2>
+                <p style={{ margin: '4px 0 0 0', fontSize: '10px', color: '#2ecc71' }}>Estimated Net Profit: <b>${netProfit.toLocaleString()} (42%)</b></p>
               </div>
 
-              <div style={{ borderTop: '1px solid #222', paddingTop: '8px' }}>
-                <span style={{ fontSize: '9px', color: '#888', letterSpacing: '1px', display: 'block' }}>OWNER & PLAN</span>
-                <div style={{ fontSize: '11px', fontWeight: 'bold', color: '#D4AF37', marginTop: '2px' }}>{hotelInfo.ownerName} • {hotelInfo.plan}</div>
+              <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                <span style={{ fontSize: '9px', color: '#888', letterSpacing: '1px', display: 'block' }}>RESTAURANT OCCUPANCY</span>
+                <div style={{ fontSize: '22px', fontWeight: 'bold', color: '#D4AF37', margin: '2px 0' }}>{occupancyPercentage}%</div>
+                <span style={{ fontSize: '9px', color: '#888' }}>{filledSeats} of {totalSeats} seats filled</span>
+              </div>
+
+              <div style={{ borderTop: '1px solid #222', paddingTop: '10px' }}>
+                <span style={{ fontSize: '9px', color: '#888', letterSpacing: '1px', display: 'block', marginBottom: '6px' }}>TABLE STATUS BREAKDOWN</span>
+                <div style={{ display: 'flex', flexDirection: 'column', gap: '4px', fontSize: '11px', color: '#ccc' }}>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>🟡 Occupied</span> <b>{occupiedCount}</b></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>🔵 Reserved</span> <b>{reservedCount}</b></div>
+                  <div style={{ display: 'flex', justifyContent: 'space-between' }}><span>🟢 Available</span> <b>{availableCount}</b></div>
+                </div>
               </div>
             </div>
 
-            {/* REAL-TIME 3D FLOOR MAP & DYNAMIC STATS PANEL */}
-            <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', background: '#0d0d0d', border: '1px solid #222', borderRadius: '12px', padding: '12px', boxSizing: 'border-box' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#F3E5AB' }}>{hotelInfo.hotelName} • LIVE 3D FLOOR</span>
-                <span style={{ fontSize: '9px', color: '#888' }}>Swipe ↔</span>
+            {/* Live 3D Table Furniture Grid (No overlapping images) */}
+            <div style={{ background: '#0d0d0d', border: '1px solid #222', borderRadius: '14px', padding: '18px', boxShadow: '0 4px 20px rgba(0,0,0,0.5)' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px', borderBottom: '1px solid #222', paddingBottom: '10px' }}>
+                <span style={{ fontSize: '12px', fontWeight: 'bold', color: '#F3E5AB' }}>🪑 3D Table Furniture Layout</span>
+                <span style={{ fontSize: '9px', color: '#2ecc71' }}>● Live Sync</span>
               </div>
 
-              <div style={{ position: 'relative', minWidth: '650px', width: '100%', borderRadius: '10px', overflow: 'hidden' }}>
-                <img src="/hero-ultra.webp" alt="3D Floor Plan" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '10px' }} />
-
-                {/* REAL-TIME OVERLAY STATS PANEL (Matches Screenshot) */}
-                <div style={{ position: 'absolute', top: '16px', left: '16px', width: '200px', background: 'rgba(10, 10, 10, 0.9)', border: '1px solid rgba(212,175,55,0.4)', borderRadius: '10px', padding: '12px', backdropFilter: 'blur(4px)', zIndex: 20 }}>
-                  <span style={{ fontSize: '8px', color: '#D4AF37', letterSpacing: '1px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>RESTAURANT OPS (LIVE)</span>
-                  
-                  {/* Occupancy */}
-                  <div style={{ marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
-                    <span style={{ fontSize: '8px', color: '#888', display: 'block' }}>OCCUPANCY</span>
-                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#F3E5AB' }}>{occupancyPercentage}%</div>
-                    <span style={{ fontSize: '8px', color: '#aaa' }}>{filledSeats} / {totalSeats} seats filled</span>
-                  </div>
-
-                  {/* Revenue Today */}
-                  <div style={{ marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
-                    <span style={{ fontSize: '8px', color: '#888', display: 'block' }}>REVENUE TODAY</span>
-                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2ecc71' }}>${totalRevenue.toLocaleString()}</div>
-                    <span style={{ fontSize: '7px', color: '#2ecc71' }}>+12.4% vs yesterday ↑</span>
-                  </div>
-
-                  {/* Live Table Status Counts */}
-                  <div>
-                    <span style={{ fontSize: '8px', color: '#888', display: 'block', marginBottom: '3px' }}>TABLE STATUS</span>
-                    <div style={{ fontSize: '9px', color: '#ccc', display: 'flex', flexDirection: 'column', gap: '2px' }}>
-                      <div>🟡 Occupied • <b>{occupiedCount}</b></div>
-                      <div>🔵 Reserved • <b>{reservedCount}</b></div>
-                      <div>🟢 Available • <b>{availableCount}</b></div>
-                    </div>
-                  </div>
-                </div>
-
-                {/* Interactive Table Markers */}
+              <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(130px, 1fr))', gap: '10px' }}>
                 {tables.map(t => {
-                  const statusColor = t.status === 'Occupied' ? '#D4AF37' : t.status === 'Reserved' ? '#3b82f6' : '#10b981';
-                  const bill = t.items.reduce((s, i) => s + i.price, 0);
+                  const borderCol = t.status === 'Occupied' ? '#D4AF37' : t.status === 'Reserved' ? '#3b82f6' : '#2ecc71';
+                  const bgCol = t.status === 'Occupied' ? 'rgba(212,175,55,0.1)' : t.status === 'Reserved' ? 'rgba(59,130,246,0.1)' : 'rgba(46,204,113,0.1)';
+                  const tableBill = t.items.reduce((s, i) => s + i.price, 0);
+
                   return (
-                    <div key={t.id} style={{ position: 'absolute', top: t.top, left: t.left, transform: 'translate(-50%, -50%)', padding: '4px 8px', borderRadius: '12px', background: 'rgba(0,0,0,0.9)', color: '#F3E5AB', border: `1px solid ${statusColor}`, fontSize: '8px', fontWeight: 'bold', boxShadow: `0 0 8px ${statusColor}`, whiteSpace: 'nowrap' }}>
-                      {t.id} • {t.status} [{t.type}]
-                      <div style={{ fontSize: '7px', color: '#aaa', marginTop: '1px' }}>
-                        {t.orderState} {bill > 0 ? `| $${bill}` : ''}
-                      </div>
+                    <div key={t.id} style={{ background: bgCol, border: `1px solid ${borderCol}`, borderRadius: '10px', padding: '12px', textAlign: 'center' }}>
+                      <b style={{ fontSize: '14px', color: '#F3E5AB' }}>Table {t.id}</b>
+                      <span style={{ fontSize: '9px', display: 'block', color: borderCol, fontWeight: 'bold', margin: '2px 0' }}>{t.status}</span>
+                      <span style={{ fontSize: '8px', color: '#888', display: 'block' }}>{t.type} ({t.seats} Seats)</span>
+                      {tableBill > 0 && <span style={{ fontSize: '10px', color: '#2ecc71', fontWeight: 'bold', display: 'block', marginTop: '4px' }}>${tableBill}</span>}
                     </div>
                   );
                 })}
@@ -279,61 +231,109 @@ export default function TableNestPinPOS() {
         </div>
       )}
 
-      {/* SETTINGS */}
+      {/* 3. SETTINGS & PINs */}
       {currentView === 'owner_settings' && (
-        <div style={{ maxWidth: '500px', margin: '0 auto', background: '#111', border: '1px solid #2ecc71', borderRadius: '12px', padding: '20px' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '14px' }}>
-            <h2 style={{ color: '#2ecc71', fontSize: '16px', margin: 0 }}>⚙️ Hotel Settings & PINs</h2>
-            <button onClick={() => setCurrentView('owner_dashboard')} style={{ padding: '5px 10px', background: '#222', color: '#aaa', border: 'none', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Back</button>
+        <div style={{ maxWidth: '500px', margin: '0 auto', background: '#0d0d0d', border: '1px solid #2ecc71', borderRadius: '14px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ color: '#2ecc71', fontSize: '16px', margin: 0 }}>⚙️ Hotel Settings & Staff PINs</h2>
+            <button onClick={() => setCurrentView('owner_dashboard')} style={{ padding: '6px 12px', background: '#161618', color: '#aaa', border: '1px solid #333', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Back</button>
           </div>
 
           <form onSubmit={handleSettingsUpdate} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
             <div>
-              <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '3px' }}>Hotel Name</label>
-              <input type="text" required value={settingsForm.hotelName} onChange={(e) => setSettingsForm({...settingsForm, hotelName: e.target.value})} style={{ width: '100%', padding: '9px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '11px', boxSizing: 'border-box' }} />
+              <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Hotel Name</label>
+              <input type="text" required value={settingsForm.hotelName} onChange={(e) => setSettingsForm({...settingsForm, hotelName: e.target.value})} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', fontSize: '12px', boxSizing: 'border-box' }} />
             </div>
 
-            <button type="submit" style={{ padding: '10px', background: '#2ecc71', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '12px' }}>
-              Save Settings
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px', color: '#60a5fa', display: 'block', marginBottom: '4px' }}>Waiter PIN</label>
+                <input type="text" maxLength="4" required value={settingsForm.newWaiterPin} onChange={(e) => setSettingsForm({...settingsForm, newWaiterPin: e.target.value})} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', textAlign: 'center', fontSize: '14px' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px', color: '#f39c12', display: 'block', marginBottom: '4px' }}>Kitchen PIN</label>
+                <input type="text" maxLength="4" required value={settingsForm.newKitchenPin} onChange={(e) => setSettingsForm({...settingsForm, newKitchenPin: e.target.value})} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', textAlign: 'center', fontSize: '14px' }} />
+              </div>
+            </div>
+
+            <button type="submit" style={{ marginTop: '10px', padding: '12px', background: '#2ecc71', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px' }}>
+              Save Settings & PINs
             </button>
             {settingsMsg && <p style={{ fontSize: '11px', color: '#2ecc71', margin: 0 }}>{settingsMsg}</p>}
           </form>
         </div>
       )}
 
-      {/* WAITER TERMINAL */}
+      {/* 4. WAITER TERMINAL */}
       {currentView === 'waiter_portal' && (
-        <div style={{ maxWidth: '900px', margin: '0 auto', display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
-          <div style={{ background: '#111', border: '1px solid #3b82f6', borderRadius: '12px', padding: '16px' }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '10px' }}>
-              <h2 style={{ color: '#60a5fa', fontSize: '16px', margin: 0 }}>📱 Waiter Terminal</h2>
-              <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '5px 10px', background: '#1c1c1e', color: '#aaa', border: '1px solid #333', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Lock</button>
-            </div>
-            
-            <form onSubmit={handleWaiterPlaceOrder} style={{ display: 'flex', flexDirection: 'column', gap: '10px', marginTop: '10px' }}>
-              <select value={orderForm.tableId} onChange={(e) => setOrderForm({ ...orderForm, tableId: e.target.value })} style={{ width: '100%', padding: '9px', background: '#000', border: '1px solid #333', borderRadius: '6px', color: '#fff', fontSize: '11px' }}>
+        <div style={{ maxWidth: '600px', margin: '0 auto', background: '#0d0d0d', border: '1px solid #3b82f6', borderRadius: '14px', padding: '24px' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '16px' }}>
+            <h2 style={{ color: '#60a5fa', fontSize: '18px', margin: 0 }}>📱 Waiter Order Terminal</h2>
+            <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 12px', background: '#161618', color: '#aaa', border: '1px solid #333', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Lock 🔒</button>
+          </div>
+          
+          <form onSubmit={handleWaiterPlaceOrder} style={{ display: 'flex', flexDirection: 'column', gap: '12px' }}>
+            <div>
+              <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Select Table</label>
+              <select value={orderForm.tableId} onChange={(e) => setOrderForm({ ...orderForm, tableId: e.target.value })} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', fontSize: '12px' }}>
                 {tables.map(t => <option key={t.id} value={t.id}>Table {t.id} ({t.status})</option>)}
               </select>
-              
-              <div style={{ display: 'flex', gap: '6px' }}>
-                <button type="button" onClick={() => changeTableStatus(orderForm.tableId, 'Available')} style={{ flex: 1, padding: '6px', background: 'rgba(16,185,129,0.2)', border: '1px solid #10b981', color: '#34d399', borderRadius: '6px', fontSize: '9px', cursor: 'pointer' }}>Available</button>
-                <button type="button" onClick={() => changeTableStatus(orderForm.tableId, 'Occupied')} style={{ flex: 1, padding: '6px', background: 'rgba(212,175,55,0.2)', border: '1px solid #D4AF37', color: '#D4AF37', borderRadius: '6px', fontSize: '9px', cursor: 'pointer' }}>Occupied</button>
-              </div>
+            </div>
 
-              <button type="submit" style={{ padding: '10px', background: '#3b82f6', color: '#fff', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px' }}>
-                Dispatch to Kitchen 🚀
-              </button>
-            </form>
-          </div>
+            <div style={{ display: 'flex', gap: '8px' }}>
+              <button type="button" onClick={() => changeTableStatus(orderForm.tableId, 'Available')} style={{ flex: 1, padding: '8px', background: 'rgba(46,204,113,0.2)', border: '1px solid #2ecc71', color: '#2ecc71', borderRadius: '6px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>Mark Available</button>
+              <button type="button" onClick={() => changeTableStatus(orderForm.tableId, 'Occupied')} style={{ flex: 1, padding: '8px', background: 'rgba(212,175,55,0.2)', border: '1px solid #D4AF37', color: '#D4AF37', borderRadius: '6px', fontSize: '10px', cursor: 'pointer', fontWeight: 'bold' }}>Mark Occupied</button>
+            </div>
+
+            <div>
+              <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Customer Name</label>
+              <input type="text" placeholder="e.g. Mr. Robert" value={orderForm.guestName} onChange={(e) => setOrderForm({ ...orderForm, guestName: e.target.value })} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+            </div>
+
+            <div style={{ display: 'flex', gap: '10px' }}>
+              <div style={{ flex: 2 }}>
+                <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Menu Item</label>
+                <input type="text" value={orderForm.itemName} onChange={(e) => setOrderForm({ ...orderForm, itemName: e.target.value })} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+              </div>
+              <div style={{ flex: 1 }}>
+                <label style={{ fontSize: '10px', color: '#aaa', display: 'block', marginBottom: '4px' }}>Price ($)</label>
+                <input type="number" value={orderForm.itemPrice} onChange={(e) => setOrderForm({ ...orderForm, itemPrice: e.target.value })} style={{ width: '100%', padding: '10px', background: '#000', border: '1px solid #333', borderRadius: '8px', color: '#fff', fontSize: '12px' }} />
+              </div>
+            </div>
+
+            <button type="submit" style={{ padding: '12px', background: '#3b82f6', color: '#fff', fontWeight: 'bold', border: 'none', borderRadius: '8px', cursor: 'pointer', fontSize: '12px', marginTop: '6px' }}>
+              Dispatch Order to Kitchen 🚀
+            </button>
+          </form>
         </div>
       )}
 
-      {/* KITCHEN PORTAL */}
+      {/* 5. KITCHEN KOT SCREEN */}
       {currentView === 'kitchen_portal' && (
         <div style={{ maxWidth: '900px', margin: '0 auto' }}>
-          <div style={{ background: '#111', border: '1px solid #e67e22', borderRadius: '12px', padding: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
-            <h2 style={{ color: '#f39c12', fontSize: '16px', margin: 0 }}>🍳 Kitchen KOT Screen</h2>
-            <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 10px', background: '#222', color: '#aaa', border: 'none', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Lock</button>
+          <div style={{ background: '#0d0d0d', border: '1px solid #e67e22', borderRadius: '14px', padding: '20px', marginBottom: '16px', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+            <h2 style={{ color: '#f39c12', fontSize: '18px', margin: 0 }}>🍳 Kitchen Order Tickets (KOT)</h2>
+            <button onClick={() => setCurrentView('pin_gateway')} style={{ padding: '6px 12px', background: '#161618', color: '#aaa', border: '1px solid #333', borderRadius: '6px', fontSize: '10px', cursor: 'pointer' }}>Lock 🔒</button>
+          </div>
+
+          <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '16px' }}>
+            {tables.filter(t => t.items.length > 0).map(t => (
+              <div key={t.id} style={{ background: '#0d0d0d', border: t.orderState === 'Ready to Serve' ? '1px solid #2ecc71' : '1px solid #e67e22', borderRadius: '12px', padding: '16px' }}>
+                <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px' }}>
+                  <b style={{ color: '#F3E5AB', fontSize: '16px' }}>Table {t.id} [{t.type}]</b>
+                  <span style={{ fontSize: '10px', color: '#f39c12' }}>{t.guest}</span>
+                </div>
+                <div style={{ fontSize: '12px', color: '#ccc', margin: '10px 0' }}>
+                  <b>Items:</b>
+                  <ul style={{ margin: '6px 0 0 16px', padding: 0 }}>
+                    {t.items.map((item, idx) => <li key={idx}>{item.name} (${item.price})</li>)}
+                  </ul>
+                </div>
+                <button onClick={() => setTables(tables.map(item => item.id === t.id ? { ...item, orderState: 'Ready to Serve' } : item))} style={{ width: '100%', padding: '10px', background: '#2ecc71', color: '#000', fontWeight: 'bold', border: 'none', borderRadius: '6px', cursor: 'pointer', fontSize: '11px' }}>
+                  Mark Ready to Serve 🚀
+                </button>
+              </div>
+            ))}
           </div>
         </div>
       )}
