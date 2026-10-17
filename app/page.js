@@ -10,7 +10,6 @@ export default function TableNestPinPOS() {
     hotelName: 'The Grand Palace Hotel',
     ownerName: 'Master Admin',
     email: 'admin@tablenest.com',
-    username: 'owner_admin',
     plan: 'Gold Monthly ($299)'
   });
 
@@ -21,20 +20,22 @@ export default function TableNestPinPOS() {
     kitchen: '3333'
   });
 
+  // Real-time Dynamic Tables with capacity (seats)
   const [tables, setTables] = useState([
-    { id: 'T1', top: '48%', left: '33%', status: 'Occupied', type: 'Dine-In', guest: 'John Doe', items: [{ name: 'Wagyu Ribeye Steak', price: 85 }, { name: 'Vintage Gold Wine', price: 150 }], orderState: 'Served', payment: 'Paid' },
-    { id: 'T2', top: '56%', left: '42%', status: 'Available', type: 'Dine-In', guest: '', items: [], orderState: 'None', payment: 'Unpaid' },
-    { id: 'T3', top: '43%', left: '67%', status: 'Occupied', type: 'Dine-In', guest: 'Alexander', items: [{ name: 'Truffle Lobster Pasta', price: 75 }], orderState: 'Cooking', payment: 'Unpaid' },
-    { id: 'T4', top: '58%', left: '61%', status: 'Occupied', type: 'Parcel', guest: 'Sarah K.', items: [{ name: 'Black Caviar Starter', price: 110 }], orderState: 'Ready to Serve', payment: 'Paid' },
-    { id: 'T5', top: '65%', left: '52%', status: 'Occupied', type: 'Dine-In', guest: 'Michael', items: [{ name: 'Chef Signature Combo', price: 130 }], orderState: 'Ordering', payment: 'Unpaid' },
-    { id: 'T6', top: '48%', left: '77%', status: 'Reserved', type: 'Dine-In', guest: 'David L.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:00 PM' },
-    { id: 'T7', top: '56%', left: '86%', status: 'Reserved', type: 'Dine-In', guest: 'Emma W.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:30 PM' },
+    { id: 'T1', top: '48%', left: '33%', status: 'Occupied', type: 'Dine-In', seats: 4, guest: 'John Doe', items: [{ name: 'Wagyu Ribeye Steak', price: 85 }, { name: 'Vintage Gold Wine', price: 150 }], orderState: 'Served', payment: 'Paid' },
+    { id: 'T2', top: '56%', left: '42%', status: 'Available', type: 'Dine-In', seats: 4, guest: '', items: [], orderState: 'None', payment: 'Unpaid' },
+    { id: 'T3', top: '43%', left: '67%', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Alexander', items: [{ name: 'Truffle Lobster Pasta', price: 75 }], orderState: 'Cooking', payment: 'Unpaid' },
+    { id: 'T4', top: '58%', left: '61%', status: 'Occupied', type: 'Parcel', seats: 4, guest: 'Sarah K.', items: [{ name: 'Black Caviar Starter', price: 110 }], orderState: 'Ready to Serve', payment: 'Paid' },
+    { id: 'T5', top: '65%', left: '52%', status: 'Occupied', type: 'Dine-In', seats: 2, guest: 'Michael', items: [{ name: 'Chef Signature Combo', price: 130 }], orderState: 'Ordering', payment: 'Unpaid' },
+    { id: 'T6', top: '48%', left: '77%', status: 'Reserved', type: 'Dine-In', seats: 2, guest: 'David L.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:00 PM' },
+    { id: 'T7', top: '56%', left: '86%', status: 'Reserved', type: 'Dine-In', seats: 4, guest: 'Emma W.', items: [], orderState: 'None', payment: 'Unpaid', time: '8:30 PM' },
   ]);
 
   const [orderForm, setOrderForm] = useState({ tableId: 'T2', guestName: '', orderType: 'Dine-In', itemName: 'Wagyu Ribeye Steak', itemPrice: 85 });
   const [settingsForm, setSettingsForm] = useState({ hotelName: hotelInfo.hotelName, ownerName: hotelInfo.ownerName, email: hotelInfo.email, oldPass: '', newPass: '', confirmPass: '', newWaiterPin: staffPins.waiter, newKitchenPin: staffPins.kitchen });
   const [settingsMsg, setSettingsMsg] = useState('');
 
+  // PIN Gateway Handler
   const handlePinSubmit = (e) => {
     e.preventDefault();
     setPinError('');
@@ -52,6 +53,7 @@ export default function TableNestPinPOS() {
     }
   };
 
+  // Waiter Order Placement Handler (Real-Time Sync)
   const handleWaiterPlaceOrder = (e) => {
     e.preventDefault();
     setTables(tables.map(t => {
@@ -69,7 +71,7 @@ export default function TableNestPinPOS() {
       }
       return t;
     }));
-    alert(`Order dispatched for Table ${orderForm.tableId}! 🔔`);
+    alert(`Order dispatched for Table ${orderForm.tableId}! Real-time revenue & occupancy updated. 🔔`);
     setOrderForm({ tableId: 'T2', guestName: '', orderType: 'Dine-In', itemName: 'Wagyu Ribeye Steak', itemPrice: 85 });
   };
 
@@ -101,9 +103,18 @@ export default function TableNestPinPOS() {
     setSettingsMsg('✓ Settings updated successfully!');
   };
 
+  // REAL-TIME CALCULATIONS
   const totalOccupiedBill = tables.reduce((sum, t) => sum + t.items.reduce((iSum, i) => iSum + i.price, 0), 0);
   const totalRevenue = 5480 + totalOccupiedBill;
   const netProfit = Math.round(totalRevenue * 0.42);
+
+  const totalSeats = tables.reduce((sum, t) => sum + t.seats, 0);
+  const filledSeats = tables.filter(t => t.status === 'Occupied').reduce((sum, t) => sum + t.seats, 0);
+  const occupancyPercentage = Math.round((filledSeats / totalSeats) * 100);
+
+  const occupiedCount = tables.filter(t => t.status === 'Occupied').length;
+  const reservedCount = tables.filter(t => t.status === 'Reserved').length;
+  const availableCount = tables.filter(t => t.status === 'Available').length;
 
   return (
     <div style={{ minHeight: '100vh', backgroundColor: '#070707', color: '#F3E5AB', fontFamily: 'sans-serif', padding: '12px', boxSizing: 'border-box' }}>
@@ -116,7 +127,7 @@ export default function TableNestPinPOS() {
           </div>
           <div>
             <h1 style={{ margin: 0, fontSize: '15px', letterSpacing: '1px', color: '#F3E5AB', fontWeight: 'bold' }}>{hotelInfo.hotelName}</h1>
-            <p style={{ margin: 0, fontSize: '8px', color: '#888', letterSpacing: '1px' }}>POS PIN-GATEWAY SYSTEM</p>
+            <p style={{ margin: 0, fontSize: '8px', color: '#888', letterSpacing: '1px' }}>POS REAL-TIME SYSTEM</p>
           </div>
         </div>
 
@@ -175,7 +186,7 @@ export default function TableNestPinPOS() {
         </div>
       )}
 
-      {/* OWNER DASHBOARD */}
+      {/* OWNER DASHBOARD (With Real-Time Dynamic Overlay Panel) */}
       {currentView === 'owner_dashboard' && (
         <div style={{ maxWidth: '1200px', margin: '0 auto' }}>
           <div style={{ display: 'flex', gap: '6px', marginBottom: '14px', flexWrap: 'wrap', background: '#111', padding: '8px', borderRadius: '10px', border: '1px solid #222' }}>
@@ -193,9 +204,9 @@ export default function TableNestPinPOS() {
             </button>
           </div>
 
-          {/* MOBILE RESPONSIVE GRID (Stacks on mobile, side-by-side on desktop) */}
           <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(280px, 1fr))', gap: '14px', alignItems: 'start' }}>
             
+            {/* Top Revenue Card */}
             <div style={{ display: 'flex', flexDirection: 'column', gap: '12px', background: '#111', border: '1px solid rgba(212,175,55,0.3)', borderRadius: '12px', padding: '14px' }}>
               <div>
                 <span style={{ fontSize: '9px', color: '#888', letterSpacing: '1px', display: 'block' }}>TOTAL REVENUE TODAY</span>
@@ -209,16 +220,46 @@ export default function TableNestPinPOS() {
               </div>
             </div>
 
-            {/* Swipeable 3D Floor Plan */}
+            {/* REAL-TIME 3D FLOOR MAP & DYNAMIC STATS PANEL */}
             <div style={{ width: '100%', overflowX: 'auto', WebkitOverflowScrolling: 'touch', background: '#0d0d0d', border: '1px solid #222', borderRadius: '12px', padding: '12px', boxSizing: 'border-box' }}>
               <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
-                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#F3E5AB' }}>{hotelInfo.hotelName} • 3D FLOOR</span>
+                <span style={{ fontSize: '11px', fontWeight: 'bold', color: '#F3E5AB' }}>{hotelInfo.hotelName} • LIVE 3D FLOOR</span>
                 <span style={{ fontSize: '9px', color: '#888' }}>Swipe ↔</span>
               </div>
 
-              <div style={{ position: 'relative', minWidth: '600px', width: '100%', borderRadius: '10px', overflow: 'hidden' }}>
+              <div style={{ position: 'relative', minWidth: '650px', width: '100%', borderRadius: '10px', overflow: 'hidden' }}>
                 <img src="/hero-ultra.webp" alt="3D Floor Plan" style={{ width: '100%', height: 'auto', display: 'block', borderRadius: '10px' }} />
 
+                {/* REAL-TIME OVERLAY STATS PANEL (Matches Screenshot) */}
+                <div style={{ position: 'absolute', top: '16px', left: '16px', width: '200px', background: 'rgba(10, 10, 10, 0.9)', border: '1px solid rgba(212,175,55,0.4)', borderRadius: '10px', padding: '12px', backdropFilter: 'blur(4px)', zIndex: 20 }}>
+                  <span style={{ fontSize: '8px', color: '#D4AF37', letterSpacing: '1px', fontWeight: 'bold', display: 'block', marginBottom: '6px' }}>RESTAURANT OPS (LIVE)</span>
+                  
+                  {/* Occupancy */}
+                  <div style={{ marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
+                    <span style={{ fontSize: '8px', color: '#888', display: 'block' }}>OCCUPANCY</span>
+                    <div style={{ fontSize: '18px', fontWeight: 'bold', color: '#F3E5AB' }}>{occupancyPercentage}%</div>
+                    <span style={{ fontSize: '8px', color: '#aaa' }}>{filledSeats} / {totalSeats} seats filled</span>
+                  </div>
+
+                  {/* Revenue Today */}
+                  <div style={{ marginBottom: '8px', borderBottom: '1px solid #222', paddingBottom: '6px' }}>
+                    <span style={{ fontSize: '8px', color: '#888', display: 'block' }}>REVENUE TODAY</span>
+                    <div style={{ fontSize: '16px', fontWeight: 'bold', color: '#2ecc71' }}>${totalRevenue.toLocaleString()}</div>
+                    <span style={{ fontSize: '7px', color: '#2ecc71' }}>+12.4% vs yesterday ↑</span>
+                  </div>
+
+                  {/* Live Table Status Counts */}
+                  <div>
+                    <span style={{ fontSize: '8px', color: '#888', display: 'block', marginBottom: '3px' }}>TABLE STATUS</span>
+                    <div style={{ fontSize: '9px', color: '#ccc', display: 'flex', flexDirection: 'column', gap: '2px' }}>
+                      <div>🟡 Occupied • <b>{occupiedCount}</b></div>
+                      <div>🔵 Reserved • <b>{reservedCount}</b></div>
+                      <div>🟢 Available • <b>{availableCount}</b></div>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Interactive Table Markers */}
                 {tables.map(t => {
                   const statusColor = t.status === 'Occupied' ? '#D4AF37' : t.status === 'Reserved' ? '#3b82f6' : '#10b981';
                   const bill = t.items.reduce((s, i) => s + i.price, 0);
